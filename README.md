@@ -3,6 +3,8 @@
 > 당근마켓 클린코드 버전으로 구현하는 중고거래 플랫폼  
 > EC2 + Jenkins를 이용한 CI/CD 구축 예정  
 > 로컬 개발환경은 Docker 기반으로 구성
+> API 명세서 :
+https://docs.google.com/spreadsheets/d/13ObicfiP9Z7a3lEyLpHXEgHhtcZqFQFfjllnbquRQIs/edit?usp=sharing
 
 ---
 
