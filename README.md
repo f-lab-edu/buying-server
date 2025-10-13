@@ -16,7 +16,7 @@
 | 🔸 게시글 등록 | 사용자가 제목, 내용, 이미지, 가격을 등록 |
 | 🔸 상품 조회 | 메인 피드에서 상품 목록 조회 (무한 스크롤) |
 | 🔸 결제 기능 | 판매자가 지정한 금액으로 Toss Pay 결제 |
-| 🔸 채팅 기능 | 구매자 ↔ 판매자 1:1 실시간 채팅 (Redis Pub/Sub) |
+| 🔸 채팅 기능 | 구매자 ↔ 판매자 1:1 실시간 채팅, 오픈 채팅방 (Redis Pub/Sub + MongoDB 저장) |
 | 🔸 로그인 | Kakao / Google OAuth2 로그인 |
 | 🔸 캐싱 | Redis 기반 캐싱 및 세션 관리 |
 
@@ -27,9 +27,9 @@
 | 구분 | 기술 |
 |------|------|
 | Language | Java 17 |
-| Framework | Spring Boot 3.x |
+| Framework | Spring Boot .2|
 | Build Tool | Gradle |
-| Database | MySQL 8 |
+| Database | MySQL 8, MongoDB, flyway |
 | Cache / Message | Redis |
 | Infra | Docker, AWS EC2, Jenkins (CI/CD) |
 | Auth | Spring Security + OAuth2 |
