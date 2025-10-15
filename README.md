@@ -6,6 +6,10 @@
 
 > API 명세서 :
 https://docs.google.com/spreadsheets/d/13ObicfiP9Z7a3lEyLpHXEgHhtcZqFQFfjllnbquRQIs/edit?usp=sharing
+> Erd 
+https://www.erdcloud.com/d/L4sAXicesp2GP4pKe
+<img width="1511" height="847" alt="image" src="https://github.com/user-attachments/assets/4f824a34-bec7-45b5-9d06-20d9be7d91e7" />
+
 
 ---
 
