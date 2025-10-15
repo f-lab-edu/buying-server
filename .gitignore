@@ -63,7 +63,3 @@ logs/
 
 ### Environment ###
 .env
-application.yml
-application-local.yml
-application-dev.yml
-docker-compose.yml
