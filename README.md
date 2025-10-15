@@ -36,7 +36,7 @@ https://www.erdcloud.com/d/L4sAXicesp2GP4pKe
 
 | 구분 | 기술 |
 |------|------|
-| Language | Java 17 |
+| Language | Java 21 |
 | Framework | Spring Boot 3.2|
 | Build Tool | Gradle |
 | Database | MySQL 8, MongoDB, flyway |
