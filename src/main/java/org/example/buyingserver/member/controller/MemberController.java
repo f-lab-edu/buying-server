@@ -28,6 +28,8 @@ public class MemberController {
     @PostMapping("/login")
     public ResponseEntity<?> memberLogin(@RequestBody MemberLoginDto memberLoginDto){
         Member member = memberService.login(memberLoginDto);
+        //일치할 경우 토큰 생성
+
 
     }
 

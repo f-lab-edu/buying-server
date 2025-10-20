@@ -11,8 +11,6 @@ import org.example.buyingserver.member.repository.MemberRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
-
 @RequiredArgsConstructor
 @Service
 
@@ -39,5 +37,4 @@ public class MemberService {
 
         return member;
     }
-
 }
