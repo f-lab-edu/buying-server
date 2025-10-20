@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.example.buyingserver.common.dto.ErrorCodeAndMessage;
 import org.example.buyingserver.common.exception.BusinessException;
 import org.example.buyingserver.member.domain.Member;
-import org.example.buyingserver.member.dto.MemberCreateResponseDto;
+import org.example.buyingserver.member.dto.MemberCreateRequestDto;
 import org.example.buyingserver.member.dto.MemberLoginDto;
 import org.example.buyingserver.member.repository.MemberRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -18,7 +18,7 @@ public class MemberService {
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public Member create(MemberCreateResponseDto dto) {
+    public Member create(MemberCreateRequestDto dto) {
         Member member = Member.builder()
                 .email(dto.email())
                 .password(passwordEncoder.encode(dto.password()))
