@@ -1,4 +1,5 @@
 package org.example.buyingserver.member.domain;
 
-public class member {
+public enum SocialType {
+    GOOGLE,KAKAO
 }
