@@ -1,7 +1,6 @@
 package org.example.buyingserver.common.auth;
 
 import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.SignatureException;
 import jakarta.servlet.*;
@@ -32,8 +31,14 @@ public class JwtTokenFilter extends GenericFilter {
 
         HttpServletRequest httpRequest = (HttpServletRequest) request;
         HttpServletResponse httpResponse = (HttpServletResponse) response;
+        String path = httpRequest.getRequestURI();
 
         try {
+            if (path.equals("/member/login") || path.equals("/member/create")) {
+                chain.doFilter(request, response);
+                return;
+            }
+
             String token = resolveToken(httpRequest);
 
             if (token != null) {
@@ -42,16 +47,14 @@ public class JwtTokenFilter extends GenericFilter {
                         .build()
                         .parseClaimsJws(token)
                         .getBody();
+
                 String email = claims.getSubject();
                 UserDetails userDetails = new User(email, "", Collections.emptyList());
                 Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, token);
                 SecurityContextHolder.getContext().setAuthentication(authentication);
-
-                chain.doFilter(request, response);
-                return;
             }
 
-            throw new BusinessException(ErrorCodeAndMessage.MISSING_AUTHORIZATION_HEADER);
+            chain.doFilter(request, response);
 
         } catch (SignatureException e) {
             sendErrorResponse(httpResponse, ErrorCodeAndMessage.TOKEN_INVALID);
