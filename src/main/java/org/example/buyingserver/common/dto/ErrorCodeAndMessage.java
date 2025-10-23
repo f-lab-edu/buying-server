@@ -23,7 +23,9 @@ public enum ErrorCodeAndMessage {
 
     //  인증/토큰 관련
     TOKEN_EXPIRED(HttpStatus.UNAUTHORIZED.value(), "만료된 토큰입니다."),
-    TOKEN_INVALID(HttpStatus.UNAUTHORIZED.value(), "유효하지 않은 토큰입니다.");
+    TOKEN_INVALID(HttpStatus.UNAUTHORIZED.value(), "유효하지 않은 토큰입니다."),
+    INVALID_TOKEN_FORMAT(401, "토큰 형식이 올바르지 않습니다."),
+    MISSING_AUTHORIZATION_HEADER(401, "Authorization 헤더가 존재하지 않습니다.");
 
     private final int code;
     private final String message;
