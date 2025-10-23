@@ -39,20 +39,24 @@ public class JwtTokenFilter extends GenericFilter {
                 return;
             }
 
-            String token = resolveToken(httpRequest);
-
-            if (token != null) {
-                Claims claims = Jwts.parserBuilder()
-                        .setSigningKey(secretKey.getBytes())
-                        .build()
-                        .parseClaimsJws(token)
-                        .getBody();
-
-                String email = claims.getSubject();
-                UserDetails userDetails = new User(email, "", Collections.emptyList());
-                Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, token);
-                SecurityContextHolder.getContext().setAuthentication(authentication);
+            String bearerToken = httpRequest.getHeader("Authorization");
+            if (bearerToken == null || !bearerToken.startsWith("Bearer ")) {
+                throw new BusinessException(ErrorCodeAndMessage.MISSING_AUTHORIZATION_HEADER);
             }
+
+            String token = bearerToken.substring(7);
+
+            Claims claims = Jwts.parserBuilder()
+                    .setSigningKey(secretKey.getBytes())
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody();
+
+            String email = claims.getSubject();
+            UserDetails userDetails = new User(email, "", Collections.emptyList());
+            Authentication authentication =
+                    new UsernamePasswordAuthenticationToken(userDetails, token, userDetails.getAuthorities());
+            SecurityContextHolder.getContext().setAuthentication(authentication);
 
             chain.doFilter(request, response);
 
@@ -70,24 +74,6 @@ public class JwtTokenFilter extends GenericFilter {
         }
     }
 
-    /**
-     * Authorization 헤더에서 Bearer 토큰 추출
-     */
-    private String resolveToken(HttpServletRequest request) {
-        String bearerToken = request.getHeader("Authorization");
-
-        if (bearerToken == null)
-            throw new BusinessException(ErrorCodeAndMessage.MISSING_AUTHORIZATION_HEADER);
-
-        if (!bearerToken.startsWith("Bearer "))
-            throw new BusinessException(ErrorCodeAndMessage.INVALID_TOKEN_FORMAT);
-
-        return bearerToken.substring(7);
-    }
-
-    /**
-     * 예외 발생 시 클라이언트에 JSON 형태로 에러 응답 반환
-     */
     private void sendErrorResponse(HttpServletResponse response, ErrorCodeAndMessage errorCode) throws IOException {
         response.setStatus(errorCode.getCode());
         response.setContentType("application/json; charset=UTF-8");
