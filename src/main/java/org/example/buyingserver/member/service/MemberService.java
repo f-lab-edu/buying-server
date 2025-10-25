@@ -18,7 +18,9 @@ public class MemberService {
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
 
+    @Transactional
     public Member create(MemberCreateRequestDto dto) {
+        validateDuplicateEmail(dto.email());
         Member member = Member.builder()
                 .email(dto.email())
                 .password(passwordEncoder.encode(dto.password()))
@@ -36,5 +38,11 @@ public class MemberService {
         }
 
         return member;
+    }
+
+    private void validateDuplicateEmail(String email) {
+        if (memberRepository.findByEmail(email).isPresent()) {
+            throw new BusinessException(ErrorCodeAndMessage.DUPLICATE_EMAIL);
+        }
     }
 }

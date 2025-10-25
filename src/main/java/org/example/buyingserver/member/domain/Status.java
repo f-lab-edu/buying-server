@@ -1,5 +1,5 @@
 package org.example.buyingserver.member.domain;
 
 public enum Status {
-    ACTIVED, DELETED
+    ACTIVE, DELETED
 }

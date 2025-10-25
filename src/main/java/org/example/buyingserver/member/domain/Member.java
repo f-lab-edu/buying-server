@@ -29,7 +29,7 @@ public class Member {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private Status status = Status.ACTIVED;
+    private Status status = Status.ACTIVE;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = true)
