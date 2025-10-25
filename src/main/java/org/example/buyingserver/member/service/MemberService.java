@@ -1,6 +1,6 @@
 package org.example.buyingserver.member.service;
 
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.example.buyingserver.common.dto.ErrorCodeAndMessage;
 import org.example.buyingserver.common.exception.BusinessException;
@@ -27,7 +27,7 @@ public class MemberService {
         return memberRepository.save(member);
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public Member login(MemberLoginDto memberLoginDto) {
         Member member = memberRepository.findByEmail(memberLoginDto.email())
                 .orElseThrow(() -> new BusinessException(ErrorCodeAndMessage.MEMBER_NOT_FOUND));
