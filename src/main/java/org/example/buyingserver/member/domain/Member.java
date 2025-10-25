@@ -1,20 +1,16 @@
 package org.example.buyingserver.member.domain;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 
-@AllArgsConstructor
-@NoArgsConstructor
+
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 @Entity
-@Builder
 @Table(name = "member")
 public class Member {
 
@@ -32,7 +28,6 @@ public class Member {
     private String nickname;
 
     @Enumerated(EnumType.STRING)
-    @Builder.Default
     @Column(nullable = false)
     private Status status = Status.RUNNING;
 
@@ -52,6 +47,16 @@ public class Member {
     private LocalDateTime updatedAt;
     @Column(nullable = true)
     private LocalDateTime deletedAt;
+
+    @Builder
+    private Member(String email, String password, String nickname, Status status, SocialType socialType, String socialid) {
+        this.email = email;
+        this.password = password;
+        this.nickname = nickname;
+        this.status = status;
+        this.socialType = socialType;
+        this.socialid = socialid;
+    }
 
     public void markAsDeleted() {
         this.deletedAt = LocalDateTime.now();
