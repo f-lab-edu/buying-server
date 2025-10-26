@@ -53,7 +53,7 @@ public class Member {
         this.email = email;
         this.password = password;
         this.nickname = nickname;
-        this.status = status;
+        this.status = (status != null) ? status : Status.ACTIVE;
         this.socialType = socialType;
         this.socialid = socialid;
     }
