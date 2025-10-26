@@ -2,6 +2,7 @@ package org.example.buyingserver.member.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.example.buyingserver.common.auth.JwtTokenProvider;
+import org.example.buyingserver.member.dto.MemberCreateResponseDto;
 import org.example.buyingserver.member.dto.MemberLoginResponseDto;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -24,14 +25,19 @@ public class MemberService {
 
 
     @Transactional
-    public Member create(MemberCreateRequestDto dto) {
+    public MemberCreateResponseDto create(MemberCreateRequestDto dto) {
         validateDuplicateEmail(dto.email());
         Member member = Member.builder()
                 .email(dto.email())
                 .password(passwordEncoder.encode(dto.password()))
                 .nickname(dto.nickname())
                 .build();
-        return memberRepository.save(member);
+        Member savedMember = memberRepository.save(member);
+        return MemberCreateResponseDto.of(
+                savedMember.getId(),
+                savedMember.getEmail(),
+                savedMember.getNickname()
+        );
     }
 
     @Transactional(readOnly = true)

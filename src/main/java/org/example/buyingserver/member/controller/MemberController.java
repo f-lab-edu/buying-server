@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.example.buyingserver.common.auth.JwtTokenProvider;
 import org.example.buyingserver.member.domain.Member;
 import org.example.buyingserver.member.dto.MemberCreateRequestDto;
+import org.example.buyingserver.member.dto.MemberCreateResponseDto;
 import org.example.buyingserver.member.dto.MemberLoginDto;
 import org.example.buyingserver.member.dto.MemberLoginResponseDto;
 import org.example.buyingserver.member.service.MemberService;
@@ -21,8 +22,8 @@ public class MemberController {
     @PostMapping("/create")
     //TokenResponse 추가할 예정
     public ResponseEntity<?> memberCreate(@RequestBody MemberCreateRequestDto memberCreateResponseDto){
-        Member member = memberService.create(memberCreateResponseDto);
-        return new ResponseEntity<>(member.getId(), HttpStatus.CREATED);
+        MemberCreateResponseDto dto = memberService.create(memberCreateResponseDto);
+        return new ResponseEntity<>(dto, HttpStatus.CREATED);
     }
 
     @PostMapping("/login")
