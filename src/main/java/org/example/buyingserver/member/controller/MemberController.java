@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/member")
 public class MemberController {
     private final MemberService memberService;
-    private final JwtTokenProvider jwtTokenProvider;
+   // private final JwtTokenProvider jwtTokenProvider;
 
     @PostMapping("/create")
     //TokenResponse 추가할 예정
@@ -27,10 +27,7 @@ public class MemberController {
 
     @PostMapping("/login")
     public ResponseEntity<?> memberLogin(@RequestBody MemberLoginDto memberLoginDto){
-        Member member = memberService.login(memberLoginDto);
-        //일치할 경우 토큰 생성
-        String jwtToken = jwtTokenProvider.createToken(member.getEmail());
-        MemberLoginResponseDto response = MemberLoginResponseDto.of(member.getId(), jwtToken);
+        MemberLoginResponseDto response = memberService.login(memberLoginDto);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }
