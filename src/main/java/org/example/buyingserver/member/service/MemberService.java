@@ -27,12 +27,15 @@ public class MemberService {
     @Transactional
     public MemberCreateResponseDto create(MemberCreateRequestDto dto) {
         validateDuplicateEmail(dto.email());
-        Member member = Member.builder()
-                .email(dto.email())
-                .password(passwordEncoder.encode(dto.password()))
-                .nickname(dto.nickname())
-                .build();
+        Member member = Member.create(
+                dto.email(),
+                dto.password(),
+                dto.nickname(),
+                passwordEncoder
+        );
+
         Member savedMember = memberRepository.save(member);
+
         return MemberCreateResponseDto.of(
                 savedMember.getId(),
                 savedMember.getEmail(),

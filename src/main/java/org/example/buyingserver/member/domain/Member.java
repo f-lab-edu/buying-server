@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDateTime;
 
@@ -56,6 +57,15 @@ public class Member {
         this.status = (status != null) ? status : Status.ACTIVE;
         this.socialType = socialType;
         this.socialid = socialid;
+    }
+
+    public static Member create(String email, String rawPassword,String nickname, PasswordEncoder encoder) {
+        return Member.builder()
+                .email(email)
+                .password(encoder.encode(rawPassword))
+                .nickname(nickname)
+                .status(Status.ACTIVE)
+                .build();
     }
 
     public void markAsDeleted() {
