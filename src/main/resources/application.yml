@@ -1,27 +1,27 @@
 spring:
   application:
     name: buying-server
-
   profiles:
     active: ${SPRING_PROFILES_ACTIVE:local}
-
   config:
     import: optional:file:.env[.properties]
-
   datasource:
     url: ${DB_URL}
     driver-class-name: ${DB_DRIVER}
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
-
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: none
     properties:
       hibernate:
         dialect: org.hibernate.dialect.MySQLDialect
         format_sql: true
     show-sql: true
+
+jwt:
+  secret: ${SECRET_KEY}
+  expiration: ${EXPIRE_TIME}
 
 server:
   port: 8080
