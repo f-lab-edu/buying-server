@@ -68,8 +68,20 @@ public class Member {
                 .build();
     }
 
+    public static Member oauthCreate(String email, String socialId, SocialType socialType) {
+        return Member.builder()
+                .email(email)
+                .status(Status.ACTIVE)
+                .socialid(socialId)
+                .socialType(socialType)
+                .build();
+    }
+
+
     public void markAsDeleted() {
         this.deletedAt = LocalDateTime.now();
         this.status = Status.DELETED;
     }
+
+
 }
