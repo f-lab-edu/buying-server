@@ -34,7 +34,7 @@ public class JwtTokenFilter extends GenericFilter {
         String path = httpRequest.getRequestURI();
 
         try {
-            if (path.equals("/member/login") || path.equals("/member/create")) {
+            if (path.equals("/member/login") || path.equals("/member/create")|| path.equals("/member/google/login"))  {
                 chain.doFilter(request, response);
                 return;
             }

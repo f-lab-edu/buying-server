@@ -19,3 +19,4 @@ google:
   redirect-uri: ${GOOGLE_REDIRECT_URI}
   token-uri: ${GOOGLE_TOKEN_URI}
   auth-uri: ${GOOGLE_AUTH_URI}
+  user-info-uri: ${GOOGLE_PROFILE_URI}
