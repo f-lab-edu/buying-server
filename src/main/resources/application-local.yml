@@ -7,12 +7,15 @@ spring:
     hibernate:
       ddl-auto: none
     show-sql: true
+
   flyway:
     enabled: true
     locations: classpath:db/migration
     baseline-on-migrate: true
 
 google:
-  client-id: YOUR_CLIENT_ID
-  client-secret: YOUR_CLIENT_SECRET
-  redirect-uri: http://localhost:8080/member/google/login
+  client-id: ${GOOGLE_CLIENT_ID}
+  client-secret: ${GOOGLE_CLIENT_SECRET}
+  redirect-uri: ${GOOGLE_REDIRECT_URI}
+  token-uri: ${GOOGLE_TOKEN_URI}
+  auth-uri: ${GOOGLE_AUTH_URI}

@@ -5,11 +5,13 @@ spring:
     active: ${SPRING_PROFILES_ACTIVE:local}
   config:
     import: optional:file:.env[.properties]
+
   datasource:
     url: ${DB_URL}
     driver-class-name: ${DB_DRIVER}
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
+
   jpa:
     hibernate:
       ddl-auto: none
