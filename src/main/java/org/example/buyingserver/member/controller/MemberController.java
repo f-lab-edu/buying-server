@@ -6,7 +6,6 @@ import org.example.buyingserver.common.auth.MemberDetails;
 import org.example.buyingserver.common.dto.ApiResponse;
 import org.example.buyingserver.common.dto.ResponseCodeAndMessage;
 import org.example.buyingserver.member.domain.Member;
-import org.example.buyingserver.member.domain.SocialType;
 import org.example.buyingserver.member.dto.*;
 import org.example.buyingserver.member.service.GoogleOauthService;
 import org.example.buyingserver.member.service.MemberService;
@@ -19,46 +18,70 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/member")
 public class MemberController {
+
     private final MemberService memberService;
     private final GoogleOauthService googleOauthService;
     private final JwtTokenProvider jwtTokenProvider;
-    // private final JwtTokenProvider jwtTokenProvider;
 
+    /**
+     * 회원 가입
+     */
     @PostMapping("/create")
-    //TokenResponse 추가할 예정
-    public ResponseEntity<?> memberCreate(@RequestBody MemberCreateRequestDto memberCreateResponseDto) {
-        MemberCreateResponseDto dto = memberService.create(memberCreateResponseDto);
-        return new ResponseEntity<>(dto, HttpStatus.CREATED);
+    public ResponseEntity<ApiResponse<MemberCreateResponseDto>> memberCreate(
+            @RequestBody MemberCreateRequestDto requestDto
+    ) {
+        MemberCreateResponseDto dto = memberService.create(requestDto);
+
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(ApiResponse.success(ResponseCodeAndMessage.MEMBER_CREATED, dto));
     }
 
+    /**
+     * 일반 로그인
+     */
     @PostMapping("/login")
-    public ResponseEntity<?> memberLogin(@RequestBody MemberLoginDto memberLoginDto) {
-        MemberLoginResponseDto response = memberService.login(memberLoginDto);
-        return new ResponseEntity<>(response, HttpStatus.OK);
+    public ResponseEntity<ApiResponse<MemberLoginResponseDto>> memberLogin(
+            @RequestBody MemberLoginDto memberLoginDto
+    ) {
+        MemberLoginResponseDto dto = memberService.login(memberLoginDto);
+
+        return ResponseEntity.ok(
+                ApiResponse.success(ResponseCodeAndMessage.AUTH_SUCCESS, dto)
+        );
     }
 
+    /**
+     * 구글 로그인
+     */
     @PostMapping("/google/login")
-    //로그인할때 받아올 코드값
-    public ResponseEntity<?> googleLogin(@RequestBody RedirectDto redirectDto) {
-        System.out.println("[DEBUG] Controller reached /member/google/login, code = " + redirectDto.code());
+    public ResponseEntity<ApiResponse<MemberLoginResponseDto>> googleLogin(
+            @RequestBody RedirectDto redirectDto
+    ) {
         AccessTokenDto accessTokenDto = googleOauthService.getAccessToken(redirectDto.code());
-        System.out.println("[DEBUG] accessTokenDto = " + accessTokenDto);
-        MemberLoginResponseDto response = googleOauthService.login(accessTokenDto.accessToken());
-        return new ResponseEntity<>(response, HttpStatus.OK);
+        MemberLoginResponseDto dto = googleOauthService.login(accessTokenDto.accessToken());
+
+        return ResponseEntity.ok(
+                ApiResponse.success(ResponseCodeAndMessage.AUTH_SUCCESS, dto)
+        );
     }
 
+    /**
+     * 프로필 조회
+     */
     @GetMapping("/profile")
     public ResponseEntity<ApiResponse<MemberProfileDto>> getProfile(
             @AuthenticationPrincipal MemberDetails memberDetails
     ) {
         Member member = memberDetails.getMember();
+
         MemberProfileDto dto = new MemberProfileDto(
                 member.getEmail(),
                 member.getNickname()
         );
+
         return ResponseEntity.ok(
                 ApiResponse.success(ResponseCodeAndMessage.MEMBER_FOUND, dto)
         );
     }
-
 }
