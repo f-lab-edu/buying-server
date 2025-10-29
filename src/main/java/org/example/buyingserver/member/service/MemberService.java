@@ -2,15 +2,12 @@ package org.example.buyingserver.member.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.example.buyingserver.common.auth.JwtTokenProvider;
-import org.example.buyingserver.member.dto.MemberCreateResponseDto;
-import org.example.buyingserver.member.dto.MemberLoginResponseDto;
+import org.example.buyingserver.member.dto.*;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.example.buyingserver.common.dto.ErrorCodeAndMessage;
 import org.example.buyingserver.common.exception.BusinessException;
 import org.example.buyingserver.member.domain.Member;
-import org.example.buyingserver.member.dto.MemberCreateRequestDto;
-import org.example.buyingserver.member.dto.MemberLoginDto;
 import org.example.buyingserver.member.repository.MemberRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -52,6 +49,17 @@ public class MemberService {
         }
         String token = jwtTokenProvider.createToken(member.getEmail());
         return MemberLoginResponseDto.of(member.getId(), token);
+    }
+
+    public MemberProfileDto getProfileByToken(String bearerToken) {
+        if (bearerToken == null || !bearerToken.startsWith("Bearer ")) {
+            throw new BusinessException(ErrorCodeAndMessage.MISSING_AUTHORIZATION_HEADER);
+        }
+        String token = bearerToken.substring(7);
+        String email = jwtTokenProvider.getEmailFromToken(token);
+        Member member = memberRepository.findByEmail(email)
+                .orElseThrow(() -> new BusinessException(ErrorCodeAndMessage.MEMBER_NOT_FOUND));
+        return new MemberProfileDto(member.getEmail(), member.getNickname());
     }
 
     private void validateDuplicateEmail(String email) {

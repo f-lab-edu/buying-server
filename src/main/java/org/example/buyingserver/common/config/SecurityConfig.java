@@ -39,7 +39,7 @@ public class SecurityConfig {
                 )
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
-                                "/member/create", "/member/login"
+                                "/member/create", "/member/login", "/member/google/*"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )
