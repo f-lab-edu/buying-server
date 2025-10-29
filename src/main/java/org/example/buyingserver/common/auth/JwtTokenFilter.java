@@ -38,6 +38,8 @@ public class JwtTokenFilter extends GenericFilter {
         HttpServletResponse httpResponse = (HttpServletResponse) response;
         String path = httpRequest.getRequestURI();
 
+        System.out.println(" [DEBUG] Request URI = " + path);
+
         try {
             if (path.equals("/member/login") ||
                     path.equals("/member/create") ||

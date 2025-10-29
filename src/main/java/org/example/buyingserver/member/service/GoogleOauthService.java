@@ -68,7 +68,6 @@ public class GoogleOauthService {
         return new AccessTokenDto(accessToken);
     }
 
-    //구글에서 getgoogle 프로필 받기
     public GoogleProfileDto getGoogleProfile(String token) {
         RestClient restClient = RestClient.create();
         ResponseEntity<GoogleProfileDto> response = restClient.get()
@@ -86,8 +85,8 @@ public class GoogleOauthService {
       return member;
     }
     //회원가입안한 사람이라면 회원가입
-    public Member createOauth(String socialId, String email, SocialType socialType) {
-        Member member = Member.oauthCreate(email, socialId, socialType);
+    public Member createOauth(String socialId, String name, String email, SocialType socialType) {
+        Member member = Member.oauthCreate(email, name, socialId, socialType);
         memberRepository.save(member);
         return member;
     }
@@ -100,6 +99,7 @@ public class GoogleOauthService {
             member = createOauth(
                     googleProfileDto.sub(),
                     googleProfileDto.email(),
+                    googleProfileDto.name(),
                     SocialType.GOOGLE
             );
         }

@@ -68,9 +68,10 @@ public class Member {
                 .build();
     }
 
-    public static Member oauthCreate(String email, String socialId, SocialType socialType) {
+    public static Member oauthCreate(String email, String nickname, String socialId, SocialType socialType) {
         return Member.builder()
                 .email(email)
+                .nickname(nickname)
                 .status(Status.ACTIVE)
                 .socialid(socialId)
                 .socialType(socialType)

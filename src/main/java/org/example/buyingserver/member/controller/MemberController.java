@@ -40,7 +40,9 @@ public class MemberController {
     @PostMapping("/google/login")
     //로그인할때 받아올 코드값
     public ResponseEntity<?> googleLogin(@RequestBody RedirectDto redirectDto) {
+        System.out.println("[DEBUG] Controller reached /member/google/login, code = " + redirectDto.code());
         AccessTokenDto accessTokenDto = googleOauthService.getAccessToken(redirectDto.code());
+        System.out.println("[DEBUG] accessTokenDto = " + accessTokenDto);
         MemberLoginResponseDto response = googleOauthService.login(accessTokenDto.accessToken());
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
