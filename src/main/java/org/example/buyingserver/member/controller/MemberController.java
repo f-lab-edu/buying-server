@@ -2,6 +2,7 @@ package org.example.buyingserver.member.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.example.buyingserver.common.auth.JwtTokenProvider;
+import org.example.buyingserver.common.dto.ApiResponse;
 import org.example.buyingserver.member.domain.Member;
 import org.example.buyingserver.member.domain.SocialType;
 import org.example.buyingserver.member.dto.*;
@@ -42,7 +43,7 @@ public class MemberController {
     }
 
     @GetMapping("/me")
-    public ResponseEntity<ApiResponse<MemberProfileDto>> getCurrentUser(Authentication authentication) {
+    public ResponseEntity<ApiResponse<MemberProfileDto>> getCurrentUser() {
         // 현재 인증된 사용자 이메일 가져오기
         String email = authentication.getName();
 
