@@ -2,7 +2,9 @@ package org.example.buyingserver.member.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.example.buyingserver.common.auth.JwtTokenProvider;
+import org.example.buyingserver.common.auth.MemberDetails;
 import org.example.buyingserver.common.dto.ApiResponse;
+import org.example.buyingserver.common.dto.ResponseCodeAndMessage;
 import org.example.buyingserver.member.domain.Member;
 import org.example.buyingserver.member.domain.SocialType;
 import org.example.buyingserver.member.dto.*;
@@ -10,6 +12,7 @@ import org.example.buyingserver.member.service.GoogleOauthService;
 import org.example.buyingserver.member.service.MemberService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RequiredArgsConstructor
@@ -23,13 +26,13 @@ public class MemberController {
 
     @PostMapping("/create")
     //TokenResponse 추가할 예정
-    public ResponseEntity<?> memberCreate(@RequestBody MemberCreateRequestDto memberCreateResponseDto){
+    public ResponseEntity<?> memberCreate(@RequestBody MemberCreateRequestDto memberCreateResponseDto) {
         MemberCreateResponseDto dto = memberService.create(memberCreateResponseDto);
         return new ResponseEntity<>(dto, HttpStatus.CREATED);
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> memberLogin(@RequestBody MemberLoginDto memberLoginDto){
+    public ResponseEntity<?> memberLogin(@RequestBody MemberLoginDto memberLoginDto) {
         MemberLoginResponseDto response = memberService.login(memberLoginDto);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
@@ -42,16 +45,18 @@ public class MemberController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @GetMapping("/me")
-    public ResponseEntity<ApiResponse<MemberProfileDto>> getCurrentUser() {
-        // 현재 인증된 사용자 이메일 가져오기
-        String email = authentication.getName();
-
-        // 서비스에서 사용자 정보 조회
-        MemberProfileDto profile = memberService.getProfileByEmail(email);
-
-        // 공통 응답 형태로 반환
-        return ResponseEntity.ok(ApiResponse.success(profile));
+    @GetMapping("/profile")
+    public ResponseEntity<ApiResponse<MemberProfileDto>> getProfile(
+            @AuthenticationPrincipal MemberDetails memberDetails
+    ) {
+        Member member = memberDetails.getMember();
+        MemberProfileDto dto = new MemberProfileDto(
+                member.getEmail(),
+                member.getNickname()
+        );
+        return ResponseEntity.ok(
+                ApiResponse.success(ResponseCodeAndMessage.MEMBER_FOUND, dto)
+        );
     }
 
 }

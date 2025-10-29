@@ -25,7 +25,7 @@ public class JwtTokenProvider {
     ) {
         this.expiration = expiration;
         this.SECRET_KEY = new SecretKeySpec(
-                Base64.getDecoder().decode(secretKey),
+                secretKey.getBytes(),
                 SignatureAlgorithm.HS512.getJcaName()
         );
     }

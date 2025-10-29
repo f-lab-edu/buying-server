@@ -8,22 +8,27 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.example.buyingserver.common.dto.ErrorCodeAndMessage;
 import org.example.buyingserver.common.exception.BusinessException;
+import org.example.buyingserver.member.domain.Member;
+import org.example.buyingserver.member.repository.MemberRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.util.Collections;
 
 @Component
 public class JwtTokenFilter extends GenericFilter {
 
     @Value("${jwt.secret}")
     private String secretKey;
+
+    private final MemberRepository memberRepository;
+
+    public JwtTokenFilter(MemberRepository memberRepository) {
+        this.memberRepository = memberRepository;
+    }
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
@@ -34,7 +39,9 @@ public class JwtTokenFilter extends GenericFilter {
         String path = httpRequest.getRequestURI();
 
         try {
-            if (path.equals("/member/login") || path.equals("/member/create")|| path.equals("/member/google/login"))  {
+            if (path.equals("/member/login") ||
+                    path.equals("/member/create") ||
+                    path.equals("/member/google/login"))  {
                 chain.doFilter(request, response);
                 return;
             }
@@ -44,7 +51,7 @@ public class JwtTokenFilter extends GenericFilter {
                 throw new BusinessException(ErrorCodeAndMessage.MISSING_AUTHORIZATION_HEADER);
             }
 
-            String token = bearerToken.substring(7);
+            String token = bearerToken.substring(7).trim();
 
             Claims claims = Jwts.parserBuilder()
                     .setSigningKey(secretKey.getBytes())
@@ -53,9 +60,18 @@ public class JwtTokenFilter extends GenericFilter {
                     .getBody();
 
             String email = claims.getSubject();
-            UserDetails userDetails = new User(email, "", Collections.emptyList());
+
+            Member member = memberRepository.findByEmail(email)
+                    .orElseThrow(() -> new BusinessException(ErrorCodeAndMessage.MEMBER_NOT_FOUND));
+
+            MemberDetails memberDetails = new MemberDetails(member);
+
             Authentication authentication =
-                    new UsernamePasswordAuthenticationToken(userDetails, token, userDetails.getAuthorities());
+                    new UsernamePasswordAuthenticationToken(
+                            memberDetails,
+                            token,
+                            memberDetails.getAuthorities()
+                    );
             SecurityContextHolder.getContext().setAuthentication(authentication);
 
             chain.doFilter(request, response);
@@ -70,6 +86,7 @@ public class JwtTokenFilter extends GenericFilter {
             sendErrorResponse(httpResponse, e.getErrorCodeAndMessage());
 
         } catch (Exception e) {
+            e.printStackTrace();
             sendErrorResponse(httpResponse, ErrorCodeAndMessage.INTERNAL_SERVER_ERROR);
         }
     }

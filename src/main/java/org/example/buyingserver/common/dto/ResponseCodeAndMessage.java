@@ -17,6 +17,7 @@ public enum ResponseCodeAndMessage {
     MEMBER_FOUND(200, "회원 정보 조회에 성공했습니다."),
     MEMBER_NOT_FOUND(404, "해당 회원을 찾을 수 없습니다."),
 
+
     // 인증 관련
     AUTH_SUCCESS(200, "로그인에 성공했습니다."),
     AUTH_FAILED(401, "인증에 실패했습니다."),
