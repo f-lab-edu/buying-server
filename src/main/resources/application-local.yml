@@ -13,6 +13,28 @@ spring:
     locations: classpath:db/migration
     baseline-on-migrate: true
 
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ${GOOGLE_CLIENT_ID}
+            client-secret: ${GOOGLE_CLIENT_SECRET}
+            redirect-uri: "{baseUrl}/login/oauth2/code/google"
+            scope:
+              - openid
+              - profile
+              - email
+        provider:
+          google:
+            authorization-uri: ${google.auth-uri}
+            token-uri: ${google.token-uri}
+            user-info-uri: ${google.user-info-uri}
+            user-name-attribute: sub
+
+server:
+  port: 8080
+
 google:
   client-id: ${GOOGLE_CLIENT_ID}
   client-secret: ${GOOGLE_CLIENT_SECRET}
@@ -20,3 +42,7 @@ google:
   token-uri: ${GOOGLE_TOKEN_URI}
   auth-uri: ${GOOGLE_AUTH_URI}
   user-info-uri: ${GOOGLE_PROFILE_URI}
+
+jwt:
+  secret: ${SECRET_KEY}
+  expiration: ${EXPIRE_TIME}
