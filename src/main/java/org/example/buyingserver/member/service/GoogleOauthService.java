@@ -72,7 +72,7 @@ public class GoogleOauthService {
         RestClient restClient = RestClient.create();
         ResponseEntity<GoogleProfileDto> response = restClient.get()
                 .uri(userInfoUri)
-                .header("Authorization", "Bearer" + token)
+                .header("Authorization", "Bearer " + token)
                 .retrieve()
                 .toEntity(GoogleProfileDto.class);
 
