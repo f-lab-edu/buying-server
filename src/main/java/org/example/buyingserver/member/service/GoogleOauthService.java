@@ -98,8 +98,8 @@ public class GoogleOauthService {
         if (member == null) {
             member = createOauth(
                     googleProfileDto.sub(),
-                    googleProfileDto.email(),
                     googleProfileDto.name(),
+                    googleProfileDto.email(),
                     SocialType.GOOGLE
             );
         }
