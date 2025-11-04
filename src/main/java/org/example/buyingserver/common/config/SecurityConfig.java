@@ -2,8 +2,9 @@ package org.example.buyingserver.common.config;
 
 import lombok.RequiredArgsConstructor;
 import org.example.buyingserver.common.auth.JwtTokenFilter;
+import org.example.buyingserver.common.dto.ErrorCodeAndMessage;
 import org.example.buyingserver.member.service.CustomOAuth2UserService;
-import org.example.buyingserver.member.handler.OAuth2SuccessHandler;
+import org.example.buyingserver.common.auth.OAuth2SuccessHandler;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -59,6 +60,14 @@ public class SecurityConfig {
                                 .userService(customOAuth2UserService)
                         )
                         .successHandler(oAuth2SuccessHandler)
+                        .failureHandler((request, response, e) -> {
+                            System.out.println("[DEBUG] : OAuth2 로그인 실패 " + e.getMessage());
+                            ErrorCodeAndMessage error = ErrorCodeAndMessage.UNAUTHORIZED;
+                            response.setStatus(error.getCode());
+                            response.setContentType("text/plain; charset=UTF-8");
+                            response.getWriter().write(error.getMessage());
+                            response.getWriter().flush();
+                        })
                 );
 
         http.addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class);
