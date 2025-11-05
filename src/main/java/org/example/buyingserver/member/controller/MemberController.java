@@ -7,7 +7,6 @@ import org.example.buyingserver.common.dto.ApiResponse;
 import org.example.buyingserver.common.dto.ResponseCodeAndMessage;
 import org.example.buyingserver.member.domain.Member;
 import org.example.buyingserver.member.dto.*;
-//import org.example.buyingserver.member.service.GoogleOauthService;
 import org.example.buyingserver.member.service.MemberService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -50,21 +49,6 @@ public class MemberController {
                 ApiResponse.success(ResponseCodeAndMessage.AUTH_SUCCESS, dto)
         );
     }
-
-    /**
-     * 구글 로그인 (OAuth)
-     */
-//    @PostMapping("/google/login")
-//    public ResponseEntity<ApiResponse<MemberLoginResponseDto>> googleLogin(
-//            @RequestBody RedirectDto redirectDto
-//    ) {
-//        AccessTokenDto accessTokenDto = googleOauthService.getAccessToken(redirectDto.code());
-//        MemberLoginResponseDto dto = googleOauthService.login(accessTokenDto.accessToken());
-//
-//        return ResponseEntity.ok(
-//                ApiResponse.success(ResponseCodeAndMessage.AUTH_SUCCESS, dto)
-//        );
-//    }
 
     /**
      * 프로필 조회
