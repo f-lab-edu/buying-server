@@ -2,33 +2,63 @@ package org.example.buyingserver.member.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.example.buyingserver.common.auth.JwtTokenProvider;
+import org.example.buyingserver.common.auth.MemberDetails;
+import org.example.buyingserver.common.dto.ApiResponse;
+import org.example.buyingserver.common.dto.ResponseCodeAndMessage;
 import org.example.buyingserver.member.domain.Member;
-import org.example.buyingserver.member.dto.MemberCreateRequestDto;
-import org.example.buyingserver.member.dto.MemberCreateResponseDto;
-import org.example.buyingserver.member.dto.MemberLoginDto;
-import org.example.buyingserver.member.dto.MemberLoginResponseDto;
+import org.example.buyingserver.member.dto.*;
 import org.example.buyingserver.member.service.MemberService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/member")
 public class MemberController {
-    private final MemberService memberService;
-   // private final JwtTokenProvider jwtTokenProvider;
 
-    @PostMapping("/create")
-    //TokenResponse 추가할 예정
-    public ResponseEntity<?> memberCreate(@RequestBody MemberCreateRequestDto memberCreateResponseDto){
-        MemberCreateResponseDto dto = memberService.create(memberCreateResponseDto);
-        return new ResponseEntity<>(dto, HttpStatus.CREATED);
-    }
+        private final MemberService memberService;
+        private final JwtTokenProvider jwtTokenProvider;
 
-    @PostMapping("/login")
-    public ResponseEntity<?> memberLogin(@RequestBody MemberLoginDto memberLoginDto){
-        MemberLoginResponseDto response = memberService.login(memberLoginDto);
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
+        /**
+         * 회원 가입
+         */
+        @PostMapping("/create")
+        public ResponseEntity<ApiResponse<MemberCreateResponseDto>> memberCreate(
+                        @RequestBody MemberCreateRequestDto requestDto) {
+                MemberCreateResponseDto dto = memberService.create(requestDto);
+
+                return ResponseEntity
+                                .status(HttpStatus.CREATED)
+                                .body(ApiResponse.success(ResponseCodeAndMessage.MEMBER_CREATED, dto));
+        }
+
+        /**
+         * 일반 로그인
+         */
+        @PostMapping("/login")
+        public ResponseEntity<ApiResponse<MemberLoginResponseDto>> memberLogin(
+                        @RequestBody MemberLoginDto memberLoginDto) {
+                MemberLoginResponseDto dto = memberService.login(memberLoginDto);
+
+                return ResponseEntity.ok(
+                                ApiResponse.success(ResponseCodeAndMessage.AUTH_SUCCESS, dto));
+        }
+
+        /**
+         * 프로필 조회
+         */
+        @GetMapping("/profile")
+        public ResponseEntity<ApiResponse<MemberProfileDto>> getProfile(
+                        @AuthenticationPrincipal MemberDetails memberDetails) {
+                Member member = memberDetails.getMember();
+
+                MemberProfileDto dto = new MemberProfileDto(
+                                member.getEmail(),
+                                member.getNickname());
+
+                return ResponseEntity.ok(
+                                ApiResponse.success(ResponseCodeAndMessage.MEMBER_FOUND, dto));
+        }
 }

@@ -13,6 +13,8 @@ public enum ErrorCodeAndMessage {
     NOT_FOUND(HttpStatus.NOT_FOUND.value(), "요청한 리소스를 찾을 수 없습니다."),
     CONFLICT(HttpStatus.CONFLICT.value(), "리소스 상태가 충돌했습니다."),
     INVALID_INPUT(HttpStatus.BAD_REQUEST.value(), "입력값이 유효하지 않습니다."),
+    GOOGLE_TOKEN_REQUEST_FAILED(HttpStatus.BAD_REQUEST.value(), "구글 OAuth 토큰 발급에 실패했습니다."),
+    GOOGLE_PROFILE_REQUEST_FAILED(HttpStatus.BAD_REQUEST.value(), "구글 사용자 프로필 정보를 가져오지 못했습니다."),
 
     // 5xx - 서버 오류
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR.value(), "서버 내부 오류가 발생했습니다."),

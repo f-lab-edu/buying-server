@@ -2,6 +2,9 @@ package org.example.buyingserver.common.config;
 
 import lombok.RequiredArgsConstructor;
 import org.example.buyingserver.common.auth.JwtTokenFilter;
+import org.example.buyingserver.common.dto.ErrorCodeAndMessage;
+import org.example.buyingserver.member.service.CustomOAuth2UserService;
+import org.example.buyingserver.common.auth.OAuth2SuccessHandler;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -22,6 +25,8 @@ import java.util.Arrays;
 public class SecurityConfig {
 
     private final JwtTokenFilter jwtTokenFilter;
+    private final CustomOAuth2UserService customOAuth2UserService;
+    private final OAuth2SuccessHandler oAuth2SuccessHandler;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -30,21 +35,45 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        return http
+        http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .sessionManagement(session ->
-                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                        session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
                 )
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
-                                "/member/create", "/member/login"
+                                "/member/create",
+                                "/member/login",
+                                "/member/google/*",   // 후에 삭제해놔야함
+                                "/oauth2/**",
+                                "/login/oauth2/**",
+                                "/swagger-ui/**",
+                                "/v3/api-docs/**",
+                                "/favicon.ico"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )
-                .addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class)
-                .build();
+                // OAuth2 로그인 구성
+                .oauth2Login(oauth2 -> oauth2
+                        .userInfoEndpoint(userInfo -> userInfo
+                                .userService(customOAuth2UserService)
+                        )
+                        .successHandler(oAuth2SuccessHandler)
+                        .failureHandler((request, response, e) -> {
+                            System.out.println("[DEBUG] : OAuth2 로그인 실패 " + e.getMessage());
+                            ErrorCodeAndMessage error = ErrorCodeAndMessage.UNAUTHORIZED;
+                            response.setStatus(error.getCode());
+                            response.setContentType("text/plain; charset=UTF-8");
+                            response.getWriter().write(error.getMessage());
+                            response.getWriter().flush();
+                        })
+                );
+
+        http.addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class);
+
+        return http.build();
     }
 
     @Bean
