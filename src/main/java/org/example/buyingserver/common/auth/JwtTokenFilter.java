@@ -38,8 +38,6 @@ public class JwtTokenFilter extends GenericFilter {
         HttpServletResponse httpResponse = (HttpServletResponse) response;
         String path = httpRequest.getRequestURI();
 
-        System.out.println(" [DEBUG] Request URI = " + path);
-
         try {
             // JWT 토큰 검증이 필요 없는 경로들
             if (path.equals("/member/login") ||
@@ -47,7 +45,7 @@ public class JwtTokenFilter extends GenericFilter {
                     path.startsWith("/oauth2/") ||
                     path.startsWith("/login/oauth2/") ||
                     path.startsWith("/swagger-ui/") ||
-                    path.startsWith("/v3/api-docs/") ||
+                    path.startsWith("/v3/api-docs") ||
                     path.equals("/favicon.ico") ||
                     path.equals("/error")) {
                 chain.doFilter(request, response);
