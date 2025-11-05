@@ -46,3 +46,7 @@ google:
 jwt:
   secret: ${SECRET_KEY}
   expiration: ${EXPIRE_TIME}
+
+oauth2:
+  frontend:
+    redirect-uri: ${GOOGLE_REDIRECT_URI}

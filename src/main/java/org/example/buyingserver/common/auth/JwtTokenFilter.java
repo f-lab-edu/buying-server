@@ -41,9 +41,15 @@ public class JwtTokenFilter extends GenericFilter {
         System.out.println(" [DEBUG] Request URI = " + path);
 
         try {
+            // JWT 토큰 검증이 필요 없는 경로들
             if (path.equals("/member/login") ||
                     path.equals("/member/create") ||
-                    path.equals("/member/google/login"))  {
+                    path.startsWith("/oauth2/") ||
+                    path.startsWith("/login/oauth2/") ||
+                    path.startsWith("/swagger-ui/") ||
+                    path.startsWith("/v3/api-docs/") ||
+                    path.equals("/favicon.ico") ||
+                    path.equals("/error")) {
                 chain.doFilter(request, response);
                 return;
             }
@@ -68,12 +74,10 @@ public class JwtTokenFilter extends GenericFilter {
 
             MemberDetails memberDetails = new MemberDetails(member);
 
-            Authentication authentication =
-                    new UsernamePasswordAuthenticationToken(
-                            memberDetails,
-                            token,
-                            memberDetails.getAuthorities()
-                    );
+            Authentication authentication = new UsernamePasswordAuthenticationToken(
+                    memberDetails,
+                    token,
+                    memberDetails.getAuthorities());
             SecurityContextHolder.getContext().setAuthentication(authentication);
 
             chain.doFilter(request, response);
@@ -100,8 +104,7 @@ public class JwtTokenFilter extends GenericFilter {
         String json = String.format(
                 "{\"status\": %d, \"message\": \"%s\"}",
                 errorCode.getCode(),
-                errorCode.getMessage()
-        );
+                errorCode.getMessage());
         response.getWriter().write(json);
     }
 }
