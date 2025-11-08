@@ -2,6 +2,7 @@ package org.example.buyingserver.post.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.example.buyingserver.common.dto.PostErrorCode;
 import org.example.buyingserver.member.domain.Member;
 import org.hibernate.annotations.CreationTimestamp;
 
@@ -27,7 +28,7 @@ public class Post {
     @Column(nullable = false)
     private Integer price;
 
-    @Column(nullable = true)
+    @Column
     private String thumbnailUrl;
 
     @Enumerated(EnumType.STRING)
@@ -38,7 +39,7 @@ public class Post {
     @Column(updatable = false, nullable = false)
     private LocalDateTime createdAt;
 
-    @Column(nullable = true)
+    @Column
     private LocalDateTime deletedAt;
 
     @Builder
@@ -58,25 +59,35 @@ public class Post {
                 .price(price)
                 .thumbnailUrl(thumbnailUrl)
                 .status(PostStatus.SELLING)
-                .createdAt(LocalDateTime.now())
                 .build();
     }
 
     public void markAsReserved() {
         if (this.status == PostStatus.DELETED) {
-            throw new IllegalStateException("삭제된 게시물은 예약할 수 없습니다.");
+            throw new IllegalStateException(PostErrorCode.POST_ALREADY_DELETED.getMessage());
         }
         this.status = PostStatus.RESERVED;
     }
 
     public void markAsDeleted() {
         if (this.status == PostStatus.DELETED) {
-            return; // 이미 삭제됨
+            return;
         }
         this.status = PostStatus.DELETED;
         this.deletedAt = LocalDateTime.now();
     }
 
+    public void cancelReservation() {
+        if (this.status != PostStatus.RESERVED) {
+            throw new IllegalStateException(PostErrorCode.POST_NOT_RESERVED.getMessage());
+        }
+        this.status = PostStatus.SELLING;
+    }
 
-
+    public void markAsSold() {
+        if (this.status == PostStatus.DELETED) {
+            throw new IllegalStateException(PostErrorCode.POST_ALREADY_DELETED.getMessage());
+        }
+        this.status = PostStatus.SOLD;
+    }
 }
