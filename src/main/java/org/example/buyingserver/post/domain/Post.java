@@ -28,7 +28,7 @@ public class Post {
     @Column(nullable = false)
     private Integer price;
 
-    @Column
+    @Column(length = 1000)
     private String thumbnailUrl;
 
     @Enumerated(EnumType.STRING)
@@ -44,7 +44,7 @@ public class Post {
 
     @Builder
     private Post(Member member, String title, Integer price, String thumbnailUrl,
-                 PostStatus status, LocalDateTime createdAt) {
+                 PostStatus status) {
         this.member = member;
         this.title = title;
         this.price = price;
@@ -58,7 +58,6 @@ public class Post {
                 .title(title)
                 .price(price)
                 .thumbnailUrl(thumbnailUrl)
-                .status(PostStatus.SELLING)
                 .build();
     }
 
