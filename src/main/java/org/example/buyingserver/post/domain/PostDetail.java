@@ -20,17 +20,22 @@ public class PostDetail {
     @Column(columnDefinition = "TEXT")
     private String content;
 
+    @Column(nullable = false)
+    private Integer quantity;
+
 
     @Builder
-    private PostDetail(Post post, String content) {
+    private PostDetail(Post post, String content, Integer quantity) {
         this.post = post;
         this.content = content;
+        this.quantity = quantity;
     }
 
-    public static PostDetail create(Post post, String content) {
+    public static PostDetail create(Post post, String content, Integer quantity) {
         return PostDetail.builder()
                 .post(post)
                 .content(content)
+                .quantity(quantity)
                 .build();
     }
 }

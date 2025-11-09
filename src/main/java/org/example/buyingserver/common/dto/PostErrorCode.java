@@ -2,7 +2,6 @@ package org.example.buyingserver.common.dto;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import org.example.buyingserver.common.dto.ResponseCodeAndMessage;
 
 @Getter
 @RequiredArgsConstructor
