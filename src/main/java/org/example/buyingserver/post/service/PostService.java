@@ -41,7 +41,7 @@ public class PostService {
     // 상세 내용 저장
     private void savePostDetailIfExists(PostCreateRequestDto dto, Post post) {
         if (dto.content() != null && !dto.content().isBlank()) {
-            PostDetail detail = PostDetail.create(post, dto.content());
+            PostDetail detail = PostDetail.create(post, dto.content(), dto.quantity());
             postDetailRepository.save(detail);
         }
     }

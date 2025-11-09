@@ -1,6 +1,3 @@
--- ================================
--- Buying Shop - Post, PostDetail, PostImage 테이블 생성
--- ================================
 
 -- --------------------------------
 -- 게시물 (post)
@@ -24,6 +21,7 @@ CREATE TABLE post_detail (
                              id BIGINT AUTO_INCREMENT PRIMARY KEY,
                              post_id BIGINT NOT NULL,
                              content TEXT,
+                             quantity INT NOT NULL DEFAULT 1,
                              CONSTRAINT fk_post_detail_post FOREIGN KEY (post_id) REFERENCES post(id)
 );
 
