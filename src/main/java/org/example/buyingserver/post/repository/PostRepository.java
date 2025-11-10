@@ -12,5 +12,5 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     Optional<Post> findByIdAndStatusNot(Long id, PostStatus status);
     List<Post> findAllByStatusIn(List<PostStatus> statuses);
     boolean existsByIdAndStatusNot(Long id, PostStatus status);
-
+    Optional<Post> findById(Long id);
 }

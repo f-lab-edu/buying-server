@@ -8,6 +8,7 @@ import org.example.buyingserver.common.dto.ResponseCodePostAndMessage;
 import org.example.buyingserver.member.domain.Member;
 import org.example.buyingserver.post.dto.PostCreateRequestDto;
 import org.example.buyingserver.post.dto.PostCreateResponseDto;
+import org.example.buyingserver.post.dto.PostDetailResponseDto;
 import org.example.buyingserver.post.dto.PostListResponseDto;
 import org.example.buyingserver.post.service.PostService;
 import org.springframework.http.HttpStatus;
@@ -41,6 +42,16 @@ public class PostController {
         PostListResponseDto response = postService.getPosts();
         return ResponseEntity.ok(
                 ApiResponse.success(ResponseCodePostAndMessage.SUCCESS_POST_FETCHED, response)
+        );
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<ApiResponse<PostDetailResponseDto>> getPostDetail(
+            @PathVariable Long id
+    ) {
+        PostDetailResponseDto response = postService.getPostDetail(id);
+        return ResponseEntity.ok(
+                ApiResponse.success(ResponseCodePostAndMessage.SUCCESS_POST_DETAIL_FETCHED, response)
         );
     }
 }

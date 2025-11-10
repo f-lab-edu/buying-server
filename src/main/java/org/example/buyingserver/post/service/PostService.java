@@ -2,15 +2,13 @@ package org.example.buyingserver.post.service;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.example.buyingserver.common.dto.PostErrorCode;
 import org.example.buyingserver.member.domain.Member;
 import org.example.buyingserver.post.domain.Post;
 import org.example.buyingserver.post.domain.PostDetail;
 import org.example.buyingserver.post.domain.PostImage;
 import org.example.buyingserver.post.domain.PostStatus;
-import org.example.buyingserver.post.dto.PostCardDto;
-import org.example.buyingserver.post.dto.PostCreateRequestDto;
-import org.example.buyingserver.post.dto.PostCreateResponseDto;
-import org.example.buyingserver.post.dto.PostListResponseDto;
+import org.example.buyingserver.post.dto.*;
 import org.example.buyingserver.post.repository.PostDetailRepository;
 import org.example.buyingserver.post.repository.PostImageRepository;
 import org.example.buyingserver.post.repository.PostRepository;
@@ -36,7 +34,6 @@ public class PostService {
     }
 
     public PostListResponseDto getPosts() {
-        //예약중, 판매중인 것만 가져오기
         List<Post> posts = postRepository.findAllByStatusIn(
                 List.of(PostStatus.SELLING, PostStatus.RESERVED)
         );
@@ -48,6 +45,17 @@ public class PostService {
         return PostListResponseDto.from(cards);
     }
 
+    public PostDetailResponseDto getPostDetail(Long postId) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new IllegalStateException(PostErrorCode.POST_NOT_FOUND.getMessage()));
+
+        PostDetail postDetail = postDetailRepository.findByPostId(postId)
+                .orElseThrow(() -> new IllegalStateException(PostErrorCode.POST_DETAIL_NOT_FOUND.getMessage()));
+
+        List<PostImage> postImages = postImageRepository.findAllByPostId(postId);
+
+        return PostDetailResponseDto.from(post, postDetail, postImages);
+    }
 
 
     // 썸네일 추출
