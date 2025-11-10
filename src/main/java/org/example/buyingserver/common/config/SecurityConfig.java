@@ -7,6 +7,7 @@ import org.example.buyingserver.member.service.CustomOAuth2UserService;
 import org.example.buyingserver.common.auth.OAuth2SuccessHandler;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -51,10 +52,9 @@ public class SecurityConfig {
                                 "/login/oauth2/**",
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**",
-                                "/favicon.ico",
-                                "/posts",
-                                "/posts/**"
+                                "/favicon.ico"
                         ).permitAll()
+                        .requestMatchers(HttpMethod.GET, "/posts/lists", "/posts/{id}").permitAll()
                         .anyRequest().authenticated()
                 )
                 // OAuth2 로그인 구성

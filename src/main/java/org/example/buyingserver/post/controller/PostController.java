@@ -36,7 +36,7 @@ public class PostController {
                 .body(ApiResponse.success(ResponseCodePostAndMessage.SUCCESS_POST_CREATED, response));
     }
 
-    @GetMapping
+    @GetMapping("/lists")
     public ResponseEntity<ApiResponse<PostListResponseDto>> getSellingPosts() {
         PostListResponseDto response = postService.getPosts();
         return ResponseEntity.ok(

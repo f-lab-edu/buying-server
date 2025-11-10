@@ -48,7 +48,7 @@ public class JwtTokenFilter extends GenericFilter {
                     path.startsWith("/v3/api-docs") ||
                     path.equals("/favicon.ico") ||
                     path.equals("/error") ||
-                    path.startsWith("/posts")) {
+                    path.startsWith("/posts/lists")) {
                 chain.doFilter(request, response);
                 return;
             }
