@@ -8,14 +8,12 @@ import org.example.buyingserver.common.dto.ResponseCodePostAndMessage;
 import org.example.buyingserver.member.domain.Member;
 import org.example.buyingserver.post.dto.PostCreateRequestDto;
 import org.example.buyingserver.post.dto.PostCreateResponseDto;
+import org.example.buyingserver.post.dto.PostListResponseDto;
 import org.example.buyingserver.post.service.PostService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -36,5 +34,13 @@ public class PostController {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(ApiResponse.success(ResponseCodePostAndMessage.SUCCESS_POST_CREATED, response));
+    }
+
+    @GetMapping
+    public ResponseEntity<ApiResponse<PostListResponseDto>> getSellingPosts() {
+        PostListResponseDto response = postService.getPosts();
+        return ResponseEntity.ok(
+                ApiResponse.success(ResponseCodePostAndMessage.SUCCESS_POST_FETCHED, response)
+        );
     }
 }

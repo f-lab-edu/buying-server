@@ -10,6 +10,7 @@ import java.util.Optional;
 public interface PostRepository extends JpaRepository<Post, Long> {
 
     Optional<Post> findByIdAndStatusNot(Long id, PostStatus status);
-    List<Post> findAllByStatusNot(PostStatus status);
+    List<Post> findAllByStatusIn(List<PostStatus> statuses);
     boolean existsByIdAndStatusNot(Long id, PostStatus status);
+
 }

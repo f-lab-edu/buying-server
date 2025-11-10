@@ -39,7 +39,7 @@ public class JwtTokenFilter extends GenericFilter {
         String path = httpRequest.getRequestURI();
 
         try {
-            // JWT 토큰 검증이 필요 없는 경로들
+            //JWT 검증이 필요 없는 공개 경로들
             if (path.equals("/member/login") ||
                     path.equals("/member/create") ||
                     path.startsWith("/oauth2/") ||
@@ -47,7 +47,8 @@ public class JwtTokenFilter extends GenericFilter {
                     path.startsWith("/swagger-ui/") ||
                     path.startsWith("/v3/api-docs") ||
                     path.equals("/favicon.ico") ||
-                    path.equals("/error")) {
+                    path.equals("/error") ||
+                    path.startsWith("/posts")) {
                 chain.doFilter(request, response);
                 return;
             }

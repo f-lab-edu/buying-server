@@ -28,7 +28,7 @@ public class Post {
     @Column(nullable = false)
     private Integer price;
 
-    @Column(length = 1000)
+    @Column(columnDefinition = "TEXT")
     private String thumbnailUrl;
 
     @Enumerated(EnumType.STRING)

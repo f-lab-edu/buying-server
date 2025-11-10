@@ -6,12 +6,17 @@ import org.example.buyingserver.member.domain.Member;
 import org.example.buyingserver.post.domain.Post;
 import org.example.buyingserver.post.domain.PostDetail;
 import org.example.buyingserver.post.domain.PostImage;
+import org.example.buyingserver.post.domain.PostStatus;
+import org.example.buyingserver.post.dto.PostCardDto;
 import org.example.buyingserver.post.dto.PostCreateRequestDto;
 import org.example.buyingserver.post.dto.PostCreateResponseDto;
+import org.example.buyingserver.post.dto.PostListResponseDto;
 import org.example.buyingserver.post.repository.PostDetailRepository;
 import org.example.buyingserver.post.repository.PostImageRepository;
 import org.example.buyingserver.post.repository.PostRepository;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -29,6 +34,21 @@ public class PostService {
         savePostImagesIfExists(dto, post);
         return new PostCreateResponseDto(post.getId());
     }
+
+    public PostListResponseDto getPosts() {
+        //예약중, 판매중인 것만 가져오기
+        List<Post> posts = postRepository.findAllByStatusIn(
+                List.of(PostStatus.SELLING, PostStatus.RESERVED)
+        );
+
+        List<PostCardDto> cards = posts.stream()
+                .map(PostCardDto::fromEntity)
+                .toList();
+
+        return PostListResponseDto.from(cards);
+    }
+
+
 
     // 썸네일 추출
     private String extractThumbnail(PostCreateRequestDto dto) {

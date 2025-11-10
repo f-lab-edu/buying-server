@@ -7,7 +7,7 @@ CREATE TABLE post (
                       member_id BIGINT NOT NULL,
                       title VARCHAR(100) NOT NULL,
                       price INT NOT NULL,
-                      thumbnail_url VARCHAR(1000),
+                      thumbnail_url TEXT,
                       status VARCHAR(20) NOT NULL DEFAULT 'SELLING',
                       created_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
                       deleted_at DATETIME(6) NULL,
@@ -31,7 +31,7 @@ CREATE TABLE post_detail (
 CREATE TABLE post_image (
                             id BIGINT AUTO_INCREMENT PRIMARY KEY,
                             post_id BIGINT NOT NULL,
-                            image_url VARCHAR(1000) NOT NULL,
+                            image_url TEXT NOT NULL,
                             image_order INT NOT NULL,
                             CONSTRAINT fk_post_image_post FOREIGN KEY (post_id) REFERENCES post(id)
 );

@@ -20,7 +20,7 @@ public class PostImage {
     @JoinColumn(name = "post_id", nullable = false)
     private Post post;
 
-    @Column(nullable = false, length = 1000)
+    @Column(columnDefinition = "TEXT")
     private String imageUrl;
 
     @Column(nullable = false)
