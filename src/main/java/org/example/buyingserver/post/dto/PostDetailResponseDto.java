@@ -2,7 +2,6 @@ package org.example.buyingserver.post.dto;
 
 import org.example.buyingserver.member.dto.MemberCardDto;
 import org.example.buyingserver.post.domain.Post;
-import org.example.buyingserver.post.domain.PostDetail;
 import org.example.buyingserver.post.domain.PostImage;
 import org.example.buyingserver.post.domain.PostStatus;
 
@@ -18,7 +17,7 @@ public record PostDetailResponseDto(
         Integer quantity,
         List<String> images
 ) {
-    public static PostDetailResponseDto from(Post post, PostDetail postDetail, List<PostImage> postImages) {
+    public static PostDetailResponseDto from(Post post, List<PostImage> postImages) {
         List<String> imageUrls = postImages.stream()
                 .map(PostImage::getImageUrl)
                 .toList();
@@ -27,10 +26,10 @@ public record PostDetailResponseDto(
                 post.getId(),
                 MemberCardDto.from(post.getMember()),
                 post.getTitle(),
-                postDetail != null ? postDetail.getContent() : null,
+                post.getContent(),
                 post.getPrice(),
                 post.getStatus(),
-                postDetail != null ? postDetail.getQuantity() : null,
+                post.getQuantity(),
                 imageUrls
         );
     }

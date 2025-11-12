@@ -1,4 +1,3 @@
-
 -- --------------------------------
 -- 게시물 (post)
 -- --------------------------------
@@ -6,23 +5,14 @@ CREATE TABLE post (
                       id BIGINT AUTO_INCREMENT PRIMARY KEY,
                       member_id BIGINT NOT NULL,
                       title VARCHAR(100) NOT NULL,
+                      content TEXT,
                       price INT NOT NULL,
+                      quantity INT NOT NULL,
                       thumbnail_url TEXT,
                       status VARCHAR(20) NOT NULL DEFAULT 'SELLING',
                       created_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
                       deleted_at DATETIME(6) NULL,
                       CONSTRAINT fk_post_member FOREIGN KEY (member_id) REFERENCES member(id)
-);
-
--- --------------------------------
--- 게시물 상세 내용 (post_detail)
--- --------------------------------
-CREATE TABLE post_detail (
-                             id BIGINT AUTO_INCREMENT PRIMARY KEY,
-                             post_id BIGINT NOT NULL,
-                             content TEXT,
-                             quantity INT NOT NULL DEFAULT 1,
-                             CONSTRAINT fk_post_detail_post FOREIGN KEY (post_id) REFERENCES post(id)
 );
 
 -- --------------------------------
@@ -33,6 +23,7 @@ CREATE TABLE post_image (
                             post_id BIGINT NOT NULL,
                             image_url TEXT NOT NULL,
                             image_order INT NOT NULL,
+                            created_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
                             CONSTRAINT fk_post_image_post FOREIGN KEY (post_id) REFERENCES post(id)
 );
 
@@ -41,4 +32,3 @@ CREATE TABLE post_image (
 -- --------------------------------
 CREATE INDEX idx_post_member_id ON post(member_id);
 CREATE INDEX idx_post_image_post_id ON post_image(post_id);
-CREATE INDEX idx_post_detail_post_id ON post_detail(post_id);

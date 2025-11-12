@@ -25,8 +25,14 @@ public class Post {
     @Column(nullable = false, length = 100)
     private String title;
 
+    @Column(columnDefinition = "TEXT", nullable = false)
+    private String content;
+
     @Column(nullable = false)
     private Integer price;
+
+    @Column(nullable = false)
+    private Integer quantity;
 
     @Column(columnDefinition = "TEXT")
     private String thumbnailUrl;
@@ -43,20 +49,34 @@ public class Post {
     private LocalDateTime deletedAt;
 
     @Builder
-    private Post(Member member, String title, Integer price, String thumbnailUrl,
+    private Post(Member member,
+                 String title,
+                 String content,
+                 Integer price,
+                 Integer quantity,
+                 String thumbnailUrl,
                  PostStatus status) {
         this.member = member;
         this.title = title;
+        this.content = content;
         this.price = price;
+        this.quantity = quantity;
         this.thumbnailUrl = thumbnailUrl;
         this.status = (status != null) ? status : PostStatus.SELLING;
     }
 
-    public static Post create(Member member, String title, Integer price, String thumbnailUrl) {
+    public static Post create(Member member,
+                              String title,
+                              String content,
+                              Integer price,
+                              Integer quantity,
+                              String thumbnailUrl) {
         return Post.builder()
                 .member(member)
                 .title(title)
+                .content(content)
                 .price(price)
+                .quantity(quantity)
                 .thumbnailUrl(thumbnailUrl)
                 .build();
     }
@@ -68,12 +88,11 @@ public class Post {
         this.status = PostStatus.RESERVED;
     }
 
-    public void markAsDeleted() {
+    public void markAsSold() {
         if (this.status == PostStatus.DELETED) {
-            return;
+            throw new IllegalStateException(PostErrorCode.POST_ALREADY_DELETED.getMessage());
         }
-        this.status = PostStatus.DELETED;
-        this.deletedAt = LocalDateTime.now();
+        this.status = PostStatus.SOLD;
     }
 
     public void cancelReservation() {
@@ -83,10 +102,16 @@ public class Post {
         this.status = PostStatus.SELLING;
     }
 
-    public void markAsSold() {
+    public void markAsDeleted() {
         if (this.status == PostStatus.DELETED) {
-            throw new IllegalStateException(PostErrorCode.POST_ALREADY_DELETED.getMessage());
+            return;
         }
-        this.status = PostStatus.SOLD;
+        this.status = PostStatus.DELETED;
+        this.deletedAt = LocalDateTime.now();
+    }
+
+    public void updateContentAndQuantity(String content, Integer quantity) {
+        this.content = content;
+        this.quantity = quantity;
     }
 }
