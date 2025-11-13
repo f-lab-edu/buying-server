@@ -3,6 +3,7 @@ package org.example.buyingserver.post.domain;
 import jakarta.persistence.*;
 import lombok.*;
 import org.example.buyingserver.common.dto.PostErrorCode;
+import org.example.buyingserver.common.exception.PostNotFoundException;
 import org.example.buyingserver.member.domain.Member;
 import org.hibernate.annotations.CreationTimestamp;
 
@@ -29,10 +30,10 @@ public class Post {
     private String content;
 
     @Column(nullable = false)
-    private Integer price;
+    private int price;
 
     @Column(nullable = false)
-    private Integer quantity;
+    private int quantity;
 
     @Column(columnDefinition = "TEXT")
     private String thumbnailUrl;
@@ -52,8 +53,8 @@ public class Post {
     private Post(Member member,
                  String title,
                  String content,
-                 Integer price,
-                 Integer quantity,
+                 int price,
+                 int quantity,
                  String thumbnailUrl,
                  PostStatus status) {
         this.member = member;
@@ -68,8 +69,8 @@ public class Post {
     public static Post create(Member member,
                               String title,
                               String content,
-                              Integer price,
-                              Integer quantity,
+                              int price,
+                              int quantity,
                               String thumbnailUrl) {
         return Post.builder()
                 .member(member)
@@ -83,21 +84,21 @@ public class Post {
 
     public void markAsReserved() {
         if (this.status == PostStatus.DELETED) {
-            throw new IllegalStateException(PostErrorCode.POST_ALREADY_DELETED.getMessage());
+            throw new PostNotFoundException(PostErrorCode.POST_ALREADY_DELETED);
         }
         this.status = PostStatus.RESERVED;
     }
 
     public void markAsSold() {
         if (this.status == PostStatus.DELETED) {
-            throw new IllegalStateException(PostErrorCode.POST_ALREADY_DELETED.getMessage());
+            throw new PostNotFoundException(PostErrorCode.POST_ALREADY_DELETED);
         }
         this.status = PostStatus.SOLD;
     }
 
     public void cancelReservation() {
         if (this.status != PostStatus.RESERVED) {
-            throw new IllegalStateException(PostErrorCode.POST_NOT_RESERVED.getMessage());
+            throw new PostNotFoundException(PostErrorCode.POST_NOT_RESERVED);
         }
         this.status = PostStatus.SELLING;
     }
@@ -110,7 +111,7 @@ public class Post {
         this.deletedAt = LocalDateTime.now();
     }
 
-    public void updateContentAndQuantity(String content, Integer quantity) {
+    public void updateContentAndQuantity(String content, int quantity) {
         this.content = content;
         this.quantity = quantity;
     }
