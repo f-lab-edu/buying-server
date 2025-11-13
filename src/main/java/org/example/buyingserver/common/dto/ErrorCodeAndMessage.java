@@ -4,7 +4,7 @@ import lombok.Getter;
 import org.springframework.http.HttpStatus;
 
 @Getter
-public enum ErrorCodeAndMessage {
+public enum ErrorCodeAndMessage implements ErrorCode {
 
     // 4xx - 클라이언트 오류
     BAD_REQUEST(HttpStatus.BAD_REQUEST.value(), "잘못된 요청입니다."),
@@ -15,6 +15,8 @@ public enum ErrorCodeAndMessage {
     INVALID_INPUT(HttpStatus.BAD_REQUEST.value(), "입력값이 유효하지 않습니다."),
     GOOGLE_TOKEN_REQUEST_FAILED(HttpStatus.BAD_REQUEST.value(), "구글 OAuth 토큰 발급에 실패했습니다."),
     GOOGLE_PROFILE_REQUEST_FAILED(HttpStatus.BAD_REQUEST.value(), "구글 사용자 프로필 정보를 가져오지 못했습니다."),
+
+    ACCESS_DENIED(HttpStatus.FORBIDDEN.value(), "접근 권한이 없습니다."),
 
     // 5xx - 서버 오류
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR.value(), "서버 내부 오류가 발생했습니다."),

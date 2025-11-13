@@ -12,7 +12,7 @@ public class ErrorResponse {
     private final String message;
     private final int code;
 
-    public static ErrorResponse fail(ErrorCodeAndMessage errorCodeAndMessage) {
+    public static ErrorResponse fail(ErrorCode errorCodeAndMessage) {
         return new ErrorResponse(
                 errorCodeAndMessage.getMessage(),
                 errorCodeAndMessage.getCode()

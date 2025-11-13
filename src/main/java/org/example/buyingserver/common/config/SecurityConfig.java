@@ -1,12 +1,15 @@
 package org.example.buyingserver.common.config;
 
 import lombok.RequiredArgsConstructor;
+import org.example.buyingserver.common.auth.CustomAccessDeniedHandler;
+import org.example.buyingserver.common.auth.CustomAuthenticationEntryPoint;
 import org.example.buyingserver.common.auth.JwtTokenFilter;
 import org.example.buyingserver.common.dto.ErrorCodeAndMessage;
 import org.example.buyingserver.member.service.CustomOAuth2UserService;
 import org.example.buyingserver.common.auth.OAuth2SuccessHandler;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -27,6 +30,9 @@ public class SecurityConfig {
     private final JwtTokenFilter jwtTokenFilter;
     private final CustomOAuth2UserService customOAuth2UserService;
     private final OAuth2SuccessHandler oAuth2SuccessHandler;
+    private final CustomAuthenticationEntryPoint authenticationEntryPoint;
+    private final CustomAccessDeniedHandler accessDeniedHandler;
+
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -42,6 +48,10 @@ public class SecurityConfig {
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
                 )
+                .exceptionHandling(ex -> ex
+                        .authenticationEntryPoint(authenticationEntryPoint)
+                        .accessDeniedHandler(accessDeniedHandler)
+                )
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/member/create",
@@ -53,6 +63,7 @@ public class SecurityConfig {
                                 "/v3/api-docs/**",
                                 "/favicon.ico"
                         ).permitAll()
+                        .requestMatchers(HttpMethod.GET, "/posts/lists", "/posts/{id}").permitAll()
                         .anyRequest().authenticated()
                 )
                 // OAuth2 로그인 구성

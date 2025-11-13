@@ -3,106 +3,107 @@ package org.example.buyingserver.common.auth;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.SignatureException;
-import jakarta.servlet.*;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 import org.example.buyingserver.common.dto.ErrorCodeAndMessage;
-import org.example.buyingserver.common.exception.BusinessException;
 import org.example.buyingserver.member.domain.Member;
 import org.example.buyingserver.member.repository.MemberRepository;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
+import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
 @Component
-public class JwtTokenFilter extends GenericFilter {
+@RequiredArgsConstructor
+public class JwtTokenFilter extends OncePerRequestFilter {
+
+    private final MemberRepository memberRepository;
 
     @Value("${jwt.secret}")
     private String secretKey;
 
-    private final MemberRepository memberRepository;
+    @Override
+    protected void doFilterInternal(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            FilterChain filterChain
+    ) throws ServletException, IOException {
 
-    public JwtTokenFilter(MemberRepository memberRepository) {
-        this.memberRepository = memberRepository;
+        String path = request.getRequestURI();
+
+        if (isPublicPath(path)) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
+        String token = resolveToken(request);
+
+        Claims claims = parseClaims(token);
+
+        setAuthentication(claims, token);
+
+        filterChain.doFilter(request, response);
     }
 
-    @Override
-    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
-            throws IOException, ServletException {
+    private boolean isPublicPath(String path) {
+        return path.equals("/member/login") ||
+                path.equals("/member/create") ||
+                path.startsWith("/oauth2/") ||
+                path.startsWith("/login/oauth2/") ||
+                path.startsWith("/swagger-ui/") ||
+                path.startsWith("/v3/api-docs") ||
+                path.equals("/favicon.ico") ||
+                path.equals("/error") ||
+                path.startsWith("/posts/lists");
+    }
 
-        HttpServletRequest httpRequest = (HttpServletRequest) request;
-        HttpServletResponse httpResponse = (HttpServletResponse) response;
-        String path = httpRequest.getRequestURI();
+    private String resolveToken(HttpServletRequest request) {
+        String bearerToken = request.getHeader("Authorization");
 
+        if (bearerToken == null || !bearerToken.startsWith("Bearer ")) {
+            throw new JwtAuthenticationException(ErrorCodeAndMessage.MISSING_AUTHORIZATION_HEADER);
+        }
+
+        return bearerToken.substring(7).trim();
+    }
+
+    private Claims parseClaims(String token) {
         try {
-            // JWT 토큰 검증이 필요 없는 경로들
-            if (path.equals("/member/login") ||
-                    path.equals("/member/create") ||
-                    path.startsWith("/oauth2/") ||
-                    path.startsWith("/login/oauth2/") ||
-                    path.startsWith("/swagger-ui/") ||
-                    path.startsWith("/v3/api-docs") ||
-                    path.equals("/favicon.ico") ||
-                    path.equals("/error")) {
-                chain.doFilter(request, response);
-                return;
-            }
-
-            String bearerToken = httpRequest.getHeader("Authorization");
-            if (bearerToken == null || !bearerToken.startsWith("Bearer ")) {
-                throw new BusinessException(ErrorCodeAndMessage.MISSING_AUTHORIZATION_HEADER);
-            }
-
-            String token = bearerToken.substring(7).trim();
-
-            Claims claims = Jwts.parserBuilder()
+            return Jwts.parserBuilder()
                     .setSigningKey(secretKey.getBytes())
                     .build()
                     .parseClaimsJws(token)
                     .getBody();
-
-            String email = claims.getSubject();
-
-            Member member = memberRepository.findByEmail(email)
-                    .orElseThrow(() -> new BusinessException(ErrorCodeAndMessage.MEMBER_NOT_FOUND));
-
-            MemberDetails memberDetails = new MemberDetails(member);
-
-            Authentication authentication = new UsernamePasswordAuthenticationToken(
-                    memberDetails,
-                    token,
-                    memberDetails.getAuthorities());
-            SecurityContextHolder.getContext().setAuthentication(authentication);
-
-            chain.doFilter(request, response);
-
-        } catch (SignatureException e) {
-            sendErrorResponse(httpResponse, ErrorCodeAndMessage.TOKEN_INVALID);
-
         } catch (io.jsonwebtoken.ExpiredJwtException e) {
-            sendErrorResponse(httpResponse, ErrorCodeAndMessage.TOKEN_EXPIRED);
-
-        } catch (BusinessException e) {
-            sendErrorResponse(httpResponse, e.getErrorCodeAndMessage());
-
+            throw new JwtAuthenticationException(ErrorCodeAndMessage.TOKEN_EXPIRED);
+        } catch (SignatureException e) {
+            throw new JwtAuthenticationException(ErrorCodeAndMessage.TOKEN_INVALID);
         } catch (Exception e) {
-            e.printStackTrace();
-            sendErrorResponse(httpResponse, ErrorCodeAndMessage.INTERNAL_SERVER_ERROR);
+            throw new JwtAuthenticationException(ErrorCodeAndMessage.TOKEN_INVALID);
         }
     }
 
-    private void sendErrorResponse(HttpServletResponse response, ErrorCodeAndMessage errorCode) throws IOException {
-        response.setStatus(errorCode.getCode());
-        response.setContentType("application/json; charset=UTF-8");
+    private void setAuthentication(Claims claims, String token) {
+        String email = claims.getSubject();
 
-        String json = String.format(
-                "{\"status\": %d, \"message\": \"%s\"}",
-                errorCode.getCode(),
-                errorCode.getMessage());
-        response.getWriter().write(json);
+        Member member = memberRepository.findByEmail(email)
+                .orElseThrow(() -> new JwtAuthenticationException(ErrorCodeAndMessage.MEMBER_NOT_FOUND));
+
+        MemberDetails memberDetails = new MemberDetails(member);
+
+        Authentication authentication = new org.springframework.security.authentication.UsernamePasswordAuthenticationToken(
+                memberDetails,
+                token,
+                memberDetails.getAuthorities()
+        );
+
+        SecurityContextHolder.getContext().setAuthentication(authentication);
     }
 }

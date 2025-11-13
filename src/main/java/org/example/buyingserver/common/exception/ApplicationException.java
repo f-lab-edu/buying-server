@@ -1,14 +1,15 @@
 package org.example.buyingserver.common.exception;
 
 import lombok.Getter;
+import org.example.buyingserver.common.dto.ErrorCode;
 import org.example.buyingserver.common.dto.ErrorCodeAndMessage;
 
 @Getter
 public class ApplicationException extends RuntimeException {
-    private final ErrorCodeAndMessage errorCodeAndMessage;
+    private final ErrorCode errorCode;
 
-    public ApplicationException(ErrorCodeAndMessage errorCodeAndMessage) {
-        super(errorCodeAndMessage.getMessage());
-        this.errorCodeAndMessage = errorCodeAndMessage;
+    public ApplicationException(ErrorCode errorCode) {
+        super(errorCode.getMessage());
+        this.errorCode = errorCode;
     }
 }
