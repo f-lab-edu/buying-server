@@ -73,7 +73,6 @@ public class SecurityConfig {
                         )
                         .successHandler(oAuth2SuccessHandler)
                         .failureHandler((request, response, e) -> {
-                            System.out.println("[DEBUG] : OAuth2 로그인 실패 " + e.getMessage());
                             ErrorCodeAndMessage error = ErrorCodeAndMessage.UNAUTHORIZED;
                             response.setStatus(error.getCode());
                             response.setContentType("text/plain; charset=UTF-8");
