@@ -1,6 +1,7 @@
 package org.example.buyingserver.common.exception;
 
 import lombok.extern.slf4j.Slf4j;
+import org.example.buyingserver.common.dto.ErrorCode;
 import org.example.buyingserver.common.dto.ErrorCodeAndMessage;
 import org.example.buyingserver.common.dto.ErrorResponse;
 import org.springframework.http.HttpStatus;
@@ -16,10 +17,13 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(BusinessException.class)
     public ResponseEntity<ErrorResponse> handleBusinessException(BusinessException e) {
-        log.error("[BusinessException] {}: {}", e.getErrorCodeAndMessage(), e.getMessage(), e);
+        ErrorCode errorCode = e.getErrorCode();
+
+        log.error("[BusinessException] {}: {}", errorCode, e.getMessage(), e);
+
         return ResponseEntity
-                .status(HttpStatus.valueOf(e.getErrorCodeAndMessage().getCode()))
-                .body(ErrorResponse.fail(e.getErrorCodeAndMessage()));
+                .status(HttpStatus.valueOf(errorCode.getCode()))
+                .body(ErrorResponse.fail(errorCode));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 
 @Getter
 @RequiredArgsConstructor
-public enum PostErrorCode {
+public enum PostErrorCode implements ErrorCode {
 
     POST_NOT_FOUND(404, "게시물을 찾을 수 없습니다."),
     POST_NOT_RESERVED(400, "예약된 게시물이 아닙니다."),

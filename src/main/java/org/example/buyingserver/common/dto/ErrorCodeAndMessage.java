@@ -4,7 +4,7 @@ import lombok.Getter;
 import org.springframework.http.HttpStatus;
 
 @Getter
-public enum ErrorCodeAndMessage {
+public enum ErrorCodeAndMessage implements ErrorCode {
 
     // 4xx - 클라이언트 오류
     BAD_REQUEST(HttpStatus.BAD_REQUEST.value(), "잘못된 요청입니다."),

@@ -2,7 +2,10 @@ package org.example.buyingserver.post.service;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.example.buyingserver.common.dto.ErrorCode;
 import org.example.buyingserver.common.dto.PostErrorCode;
+import org.example.buyingserver.common.exception.BusinessException;
+import org.example.buyingserver.common.exception.PostNotFoundException;
 import org.example.buyingserver.member.domain.Member;
 import org.example.buyingserver.post.domain.Post;
 import org.example.buyingserver.post.domain.PostImage;
@@ -54,7 +57,7 @@ public class PostService {
 
     public PostDetailResponseDto getPostDetail(Long postId) {
         Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new IllegalStateException(PostErrorCode.POST_NOT_FOUND.getMessage()));
+                .orElseThrow(() -> new PostNotFoundException(PostErrorCode.POST_NOT_FOUND));
 
         List<PostImage> postImages = postImageRepository.findAllByPostId(postId);
 

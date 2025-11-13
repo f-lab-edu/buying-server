@@ -6,6 +6,7 @@ import io.jsonwebtoken.security.SignatureException;
 import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.example.buyingserver.common.dto.ErrorCode;
 import org.example.buyingserver.common.dto.ErrorCodeAndMessage;
 import org.example.buyingserver.common.exception.BusinessException;
 import org.example.buyingserver.member.domain.Member;
@@ -88,7 +89,7 @@ public class JwtTokenFilter extends GenericFilter {
             sendErrorResponse(httpResponse, ErrorCodeAndMessage.TOKEN_EXPIRED);
 
         } catch (BusinessException e) {
-            sendErrorResponse(httpResponse, e.getErrorCodeAndMessage());
+            sendErrorResponse(httpResponse, e.getErrorCode());
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -96,7 +97,7 @@ public class JwtTokenFilter extends GenericFilter {
         }
     }
 
-    private void sendErrorResponse(HttpServletResponse response, ErrorCodeAndMessage errorCode) throws IOException {
+    private void sendErrorResponse(HttpServletResponse response, ErrorCode errorCode) throws IOException {
         response.setStatus(errorCode.getCode());
         response.setContentType("application/json; charset=UTF-8");
 
