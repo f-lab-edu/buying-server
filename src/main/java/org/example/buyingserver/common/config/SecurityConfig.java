@@ -1,6 +1,8 @@
 package org.example.buyingserver.common.config;
 
 import lombok.RequiredArgsConstructor;
+import org.example.buyingserver.common.auth.CustomAccessDeniedHandler;
+import org.example.buyingserver.common.auth.CustomAuthenticationEntryPoint;
 import org.example.buyingserver.common.auth.JwtTokenFilter;
 import org.example.buyingserver.common.dto.ErrorCodeAndMessage;
 import org.example.buyingserver.member.service.CustomOAuth2UserService;
@@ -28,6 +30,9 @@ public class SecurityConfig {
     private final JwtTokenFilter jwtTokenFilter;
     private final CustomOAuth2UserService customOAuth2UserService;
     private final OAuth2SuccessHandler oAuth2SuccessHandler;
+    private final CustomAuthenticationEntryPoint authenticationEntryPoint;
+    private final CustomAccessDeniedHandler accessDeniedHandler;
+
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -42,6 +47,10 @@ public class SecurityConfig {
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
+                )
+                .exceptionHandling(ex -> ex
+                        .authenticationEntryPoint(authenticationEntryPoint)
+                        .accessDeniedHandler(accessDeniedHandler)
                 )
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
