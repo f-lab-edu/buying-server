@@ -37,7 +37,6 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
         // 1. OAuth2 로그인 완료된 사용자 정보 추출
         OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
         String email = oAuth2User.getAttribute("email");
-        System.out.println("[DEBUG] : 로그인 완료 후 사용자 정보 추출 email " + email);
 
         if (email == null) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST, "이메일 정보를 가져올 수 없습니다.");
@@ -49,7 +48,6 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
 
         // 회원이 없으면 생성 (CustomOAuth2UserService에서 생성되지 않은 경우 대비)
         if (member == null) {
-            System.out.println("[DEBUG] OAuth2SuccessHandler - 회원이 없어서 생성 시작: " + email);
             String name = oAuth2User.getAttribute("name");
             String socialId = oAuth2User.getAttribute("sub"); // Google의 userNameAttributeName
 
@@ -59,9 +57,7 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
                     socialId,
                     org.example.buyingserver.member.domain.SocialType.GOOGLE);
             member = memberRepository.save(member);
-            System.out.println("[DEBUG] OAuth2SuccessHandler - 회원 생성 완료: " + email + ", ID: " + member.getId());
         } else {
-            System.out.println("[DEBUG] OAuth2SuccessHandler - 기존 회원 발견: " + email + ", ID: " + member.getId());
         }
 
         // 3. JWT 생성
@@ -74,7 +70,6 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
                 encodedToken,
                 member.getId());
 
-        System.out.println("[DEBUG] OAuth2SuccessHandler - 프론트엔드로 리다이렉트: " + redirectUrl);
         response.sendRedirect(redirectUrl);
     }
 }

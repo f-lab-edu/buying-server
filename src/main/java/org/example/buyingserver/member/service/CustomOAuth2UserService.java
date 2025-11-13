@@ -1,5 +1,6 @@
 package org.example.buyingserver.member.service;
 
+import groovy.util.logging.Slf4j;
 import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -25,7 +26,6 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     @Override
     @Transactional
     public OAuth2User loadUser(OAuth2UserRequest userRequest) {
-        System.out.println("[DEBUG] CustomOAuth2UserService.loadUser 실행 시작");
         OAuth2User oAuth2User = super.loadUser(userRequest);
 
         String registrationId = userRequest.getClientRegistration().getRegistrationId();
@@ -39,26 +39,18 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         String name = oAuth2User.getAttribute("name");
         String socialId = oAuth2User.getAttribute(userNameAttributeName);
 
-        System.out.println(
-                "[DEBUG] CustomOAuth2UserService - email: " + email + ", name: " + name + ", socialId: " + socialId);
 
         Optional<Member> existingMember = memberRepository.findByEmail(email);
         if (existingMember.isPresent()) {
-            System.out.println("[DEBUG] CustomOAuth2UserService - 기존 회원 발견: " + email);
             return new DefaultOAuth2User(
                     Collections.emptyList(),
                     oAuth2User.getAttributes(),
                     userNameAttributeName);
         }
 
-        System.out.println("[DEBUG] CustomOAuth2UserService - 새 회원 생성 시작: " + email);
         Member newMember = Member.oauthCreate(email, name, socialId, SocialType.GOOGLE);
         Member savedMember = memberRepository.save(newMember);
-        // 트랜잭션이 커밋되기 전에 DB에 반영되도록 flush
         entityManager.flush();
-        System.out.println(
-                "[DEBUG] CustomOAuth2UserService - 회원 생성 완료 및 flush: " + email + ", ID: " + savedMember.getId());
-
         return new DefaultOAuth2User(
                 Collections.emptyList(),
                 oAuth2User.getAttributes(),
