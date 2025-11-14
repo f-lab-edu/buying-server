@@ -2,6 +2,7 @@ package org.example.buyingserver.member.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.example.buyingserver.common.auth.JwtTokenProvider;
+import org.example.buyingserver.member.domain.SocialType;
 import org.example.buyingserver.member.dto.*;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -61,6 +62,17 @@ public class MemberService {
                 .orElseThrow(() -> new BusinessException(ErrorCodeAndMessage.MEMBER_NOT_FOUND));
         return new MemberProfileDto(member.getEmail(), member.getNickname());
     }
+
+    public Member registerOAuthMember(String email, String name, String socialId, SocialType socialType) {
+        return memberRepository.findByEmail(email)
+                .orElseGet(() -> {
+                    //이메일 가진 회원없으면 생성 저장
+                    Member newMember = Member.oauthCreate(email, name, socialId, socialType);
+                    return memberRepository.save(newMember);
+                });
+    }
+
+
 
     private void validateDuplicateEmail(String email) {
         if (memberRepository.findByEmail(email).isPresent()) {
