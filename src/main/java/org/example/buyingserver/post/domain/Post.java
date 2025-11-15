@@ -2,7 +2,7 @@ package org.example.buyingserver.post.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.example.buyingserver.common.dto.PostErrorCode;
+import org.example.buyingserver.post.exception.PostErrorCode;
 import org.example.buyingserver.post.exception.PostNotFoundException;
 import org.example.buyingserver.member.domain.Member;
 import org.hibernate.annotations.CreationTimestamp;

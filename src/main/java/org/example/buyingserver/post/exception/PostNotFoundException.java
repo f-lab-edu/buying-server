@@ -1,6 +1,5 @@
 package org.example.buyingserver.post.exception;
 
-import org.example.buyingserver.common.dto.PostErrorCode;
 import org.example.buyingserver.common.exception.BusinessException;
 
 public class PostNotFoundException extends BusinessException {

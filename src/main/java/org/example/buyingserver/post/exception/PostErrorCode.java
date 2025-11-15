@@ -1,7 +1,8 @@
-package org.example.buyingserver.common.dto;
+package org.example.buyingserver.post.exception;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import org.example.buyingserver.common.dto.ErrorCode;
 
 @Getter
 @RequiredArgsConstructor
