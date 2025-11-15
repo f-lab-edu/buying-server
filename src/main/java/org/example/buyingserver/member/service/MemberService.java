@@ -1,21 +1,21 @@
 package org.example.buyingserver.member.service;
 
 import lombok.extern.slf4j.Slf4j;
+import lombok.RequiredArgsConstructor;
 import org.example.buyingserver.common.auth.JwtTokenProvider;
 import org.example.buyingserver.member.dto.*;
-import org.springframework.transaction.annotation.Transactional;
-import lombok.RequiredArgsConstructor;
-import org.example.buyingserver.common.dto.ErrorCodeAndMessage;
-import org.example.buyingserver.common.exception.BusinessException;
 import org.example.buyingserver.member.domain.Member;
+import org.example.buyingserver.member.exception.*;
 import org.example.buyingserver.member.repository.MemberRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @RequiredArgsConstructor
 @Service
 public class MemberService {
+
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
@@ -23,7 +23,9 @@ public class MemberService {
 
     @Transactional
     public MemberCreateResponseDto create(MemberCreateRequestDto dto) {
+
         validateDuplicateEmail(dto.email());
+
         Member member = Member.create(
                 dto.email(),
                 dto.password(),
@@ -40,31 +42,42 @@ public class MemberService {
         );
     }
 
+
     @Transactional(readOnly = true)
     public MemberLoginResponseDto login(MemberLoginDto memberLoginDto) {
+
         Member member = memberRepository.findByEmail(memberLoginDto.email())
-                .orElseThrow(() -> new BusinessException(ErrorCodeAndMessage.MEMBER_NOT_FOUND));
+                .orElseThrow(MemberNotFoundException::new);
+
         if (!passwordEncoder.matches(memberLoginDto.password(), member.getPassword())) {
-            throw new BusinessException(ErrorCodeAndMessage.INVALID_PASSWORD);
+            throw new InvalidPasswordException();
         }
+
         String token = jwtTokenProvider.createToken(member.getEmail());
+
         return MemberLoginResponseDto.of(member.getId(), token);
     }
 
+
     public MemberProfileDto getProfileByToken(String bearerToken) {
+
         if (bearerToken == null || !bearerToken.startsWith("Bearer ")) {
-            throw new BusinessException(ErrorCodeAndMessage.MISSING_AUTHORIZATION_HEADER);
+            throw new MissingAuthHeaderException();
         }
+
         String token = bearerToken.substring(7);
         String email = jwtTokenProvider.getEmailFromToken(token);
+
         Member member = memberRepository.findByEmail(email)
-                .orElseThrow(() -> new BusinessException(ErrorCodeAndMessage.MEMBER_NOT_FOUND));
+                .orElseThrow(MemberNotFoundException::new);
+
         return new MemberProfileDto(member.getEmail(), member.getNickname());
     }
 
+
     private void validateDuplicateEmail(String email) {
         if (memberRepository.findByEmail(email).isPresent()) {
-            throw new BusinessException(ErrorCodeAndMessage.DUPLICATE_EMAIL);
+            throw new DuplicateEmailException();
         }
     }
 }

@@ -2,8 +2,7 @@ package org.example.buyingserver.post.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.example.buyingserver.post.exception.PostErrorCode;
-import org.example.buyingserver.post.exception.PostNotFoundException;
+import org.example.buyingserver.post.exception.*;
 import org.example.buyingserver.member.domain.Member;
 import org.hibernate.annotations.CreationTimestamp;
 
@@ -84,21 +83,24 @@ public class Post {
 
     public void markAsReserved() {
         if (this.status == PostStatus.DELETED) {
-            throw new PostNotFoundException(PostErrorCode.POST_ALREADY_DELETED);
+            throw new PostAlreadyDeletedException();
+        }
+        if (this.status == PostStatus.RESERVED) {
+            throw new PostAlreadyReservedException();
         }
         this.status = PostStatus.RESERVED;
     }
 
     public void markAsSold() {
         if (this.status == PostStatus.DELETED) {
-            throw new PostNotFoundException(PostErrorCode.POST_ALREADY_DELETED);
+            throw new PostAlreadyDeletedException();
         }
         this.status = PostStatus.SOLD;
     }
 
     public void cancelReservation() {
         if (this.status != PostStatus.RESERVED) {
-            throw new PostNotFoundException(PostErrorCode.POST_NOT_RESERVED);
+            throw new PostNotReservedException();
         }
         this.status = PostStatus.SELLING;
     }
@@ -110,6 +112,7 @@ public class Post {
         this.status = PostStatus.DELETED;
         this.deletedAt = LocalDateTime.now();
     }
+
 
     public void updateContentAndQuantity(String content, int quantity) {
         this.content = content;
