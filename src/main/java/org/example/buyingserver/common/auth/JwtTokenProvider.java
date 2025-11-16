@@ -3,14 +3,13 @@ package org.example.buyingserver.common.auth;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
-import org.example.buyingserver.common.dto.ErrorCodeAndMessage;
 import org.example.buyingserver.common.exception.BusinessException;
+import org.example.buyingserver.common.exception.GlobalErrorCode;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.spec.SecretKeySpec;
 import java.security.Key;
-import java.util.Base64;
 import java.util.Date;
 
 @Component
@@ -53,7 +52,7 @@ public class JwtTokenProvider {
 
             return claims.getSubject(); // email
         } catch (Exception e) {
-            throw new BusinessException(ErrorCodeAndMessage.TOKEN_INVALID);
+            throw new BusinessException(GlobalErrorCode.TOKEN_INVALID);
         }
     }
 }

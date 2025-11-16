@@ -1,8 +1,10 @@
-package org.example.buyingserver.common.exception;
+package org.example.buyingserver.common.handler;
 
 import lombok.extern.slf4j.Slf4j;
-import org.example.buyingserver.common.dto.ErrorCodeAndMessage;
+import org.example.buyingserver.common.dto.ErrorCode;
 import org.example.buyingserver.common.dto.ErrorResponse;
+import org.example.buyingserver.common.exception.BusinessException;
+import org.example.buyingserver.common.exception.GlobalErrorCode;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -16,10 +18,13 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(BusinessException.class)
     public ResponseEntity<ErrorResponse> handleBusinessException(BusinessException e) {
-        log.error("[BusinessException] {}: {}", e.getErrorCodeAndMessage(), e.getMessage(), e);
+        ErrorCode errorCode = e.getErrorCode();
+
+        log.error("[BusinessException] {}: {}", errorCode, e.getMessage(), e);
+
         return ResponseEntity
-                .status(HttpStatus.valueOf(e.getErrorCodeAndMessage().getCode()))
-                .body(ErrorResponse.fail(e.getErrorCodeAndMessage()));
+                .status(HttpStatus.valueOf(errorCode.getCode()))
+                .body(ErrorResponse.fail(errorCode));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -27,7 +32,7 @@ public class GlobalExceptionHandler {
         log.error("[ValidationException] {}", e.getMessage(), e);
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
-                .body(ErrorResponse.fail(ErrorCodeAndMessage.INVALID_INPUT));
+                .body(ErrorResponse.fail(GlobalErrorCode.INVALID_INPUT));
     }
 
     @ExceptionHandler(Exception.class)
@@ -35,7 +40,7 @@ public class GlobalExceptionHandler {
         log.error("[UnexpectedException] {}", e.getMessage(), e);
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(ErrorResponse.fail(ErrorCodeAndMessage.INTERNAL_SERVER_ERROR));
+                .body(ErrorResponse.fail(GlobalErrorCode.INTERNAL_SERVER_ERROR));
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
@@ -43,7 +48,7 @@ public class GlobalExceptionHandler {
         log.error("[HttpMessageNotReadableException] {}", e.getMessage(), e);
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
-                .body(ErrorResponse.fail(ErrorCodeAndMessage.INVALID_INPUT));
+                .body(ErrorResponse.fail(GlobalErrorCode.INVALID_INPUT));
     }
 
 }
