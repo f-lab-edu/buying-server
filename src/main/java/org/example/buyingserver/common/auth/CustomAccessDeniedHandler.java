@@ -6,7 +6,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.buyingserver.common.dto.ApiResponse;
-import org.example.buyingserver.common.dto.ErrorCodeAndMessage;
+import org.example.buyingserver.common.exception.GlobalErrorCode;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.web.access.AccessDeniedHandler;
@@ -30,9 +30,9 @@ public class CustomAccessDeniedHandler implements AccessDeniedHandler {
 
         log.error("Access Denied: {}", request.getRequestURI());
 
-        ApiResponse<?> apiResponse = ApiResponse.error(ErrorCodeAndMessage.ACCESS_DENIED);
+        ApiResponse<?> apiResponse = ApiResponse.error(GlobalErrorCode.ACCESS_DENIED);
 
-        response.setStatus(ErrorCodeAndMessage.ACCESS_DENIED.getCode());
+        response.setStatus(GlobalErrorCode.ACCESS_DENIED.getCode());
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.setCharacterEncoding("UTF-8");
         response.getWriter().write(objectMapper.writeValueAsString(apiResponse));

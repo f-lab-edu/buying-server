@@ -8,11 +8,11 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.example.buyingserver.common.dto.ErrorCodeAndMessage;
+import org.example.buyingserver.common.exception.GlobalErrorCode;
 import org.example.buyingserver.member.domain.Member;
+import org.example.buyingserver.member.exception.MemberErrorCode;
 import org.example.buyingserver.member.repository.MemberRepository;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -68,7 +68,7 @@ public class JwtTokenFilter extends OncePerRequestFilter {
         String bearerToken = request.getHeader("Authorization");
 
         if (bearerToken == null || !bearerToken.startsWith("Bearer ")) {
-            throw new JwtAuthenticationException(ErrorCodeAndMessage.MISSING_AUTHORIZATION_HEADER);
+            throw new JwtAuthenticationException(GlobalErrorCode.MISSING_AUTHORIZATION_HEADER);
         }
 
         return bearerToken.substring(7).trim();
@@ -81,12 +81,15 @@ public class JwtTokenFilter extends OncePerRequestFilter {
                     .build()
                     .parseClaimsJws(token)
                     .getBody();
+
         } catch (io.jsonwebtoken.ExpiredJwtException e) {
-            throw new JwtAuthenticationException(ErrorCodeAndMessage.TOKEN_EXPIRED);
+            throw new JwtAuthenticationException(GlobalErrorCode.TOKEN_EXPIRED);
+
         } catch (SignatureException e) {
-            throw new JwtAuthenticationException(ErrorCodeAndMessage.TOKEN_INVALID);
+            throw new JwtAuthenticationException(GlobalErrorCode.TOKEN_INVALID);
+
         } catch (Exception e) {
-            throw new JwtAuthenticationException(ErrorCodeAndMessage.TOKEN_INVALID);
+            throw new JwtAuthenticationException(GlobalErrorCode.TOKEN_INVALID);
         }
     }
 
@@ -94,7 +97,7 @@ public class JwtTokenFilter extends OncePerRequestFilter {
         String email = claims.getSubject();
 
         Member member = memberRepository.findByEmail(email)
-                .orElseThrow(() -> new JwtAuthenticationException(ErrorCodeAndMessage.MEMBER_NOT_FOUND));
+                .orElseThrow(() -> new JwtAuthenticationException(MemberErrorCode.MEMBER_NOT_FOUND));
 
         MemberDetails memberDetails = new MemberDetails(member);
 

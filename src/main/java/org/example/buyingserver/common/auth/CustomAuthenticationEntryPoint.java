@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.buyingserver.common.dto.ApiResponse;
 import org.example.buyingserver.common.dto.ErrorCode;
+import org.example.buyingserver.common.exception.GlobalErrorCode;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;
@@ -33,7 +34,7 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
         ErrorCode errorCode =
                 (authException instanceof JwtAuthenticationException jwtEx)
                         ? jwtEx.getErrorCode()
-                        : org.example.buyingserver.common.dto.ErrorCodeAndMessage.UNAUTHORIZED;
+                        : GlobalErrorCode.UNAUTHORIZED;
 
         ApiResponse<?> apiResponse = ApiResponse.error(errorCode);
         String responseBody = objectMapper.writeValueAsString(apiResponse);

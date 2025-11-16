@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.example.buyingserver.common.auth.CustomAccessDeniedHandler;
 import org.example.buyingserver.common.auth.CustomAuthenticationEntryPoint;
 import org.example.buyingserver.common.auth.JwtTokenFilter;
-import org.example.buyingserver.common.dto.ErrorCodeAndMessage;
+import org.example.buyingserver.common.exception.GlobalErrorCode;
 import org.example.buyingserver.member.service.CustomOAuth2UserService;
 import org.example.buyingserver.common.auth.OAuth2SuccessHandler;
 import org.springframework.context.annotation.Bean;
@@ -41,6 +41,7 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+
         http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(AbstractHttpConfigurer::disable)
@@ -56,7 +57,7 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/member/create",
                                 "/member/login",
-                                "/member/google/*",   // 후에 삭제해놔야함
+                                "/member/google/*",
                                 "/oauth2/**",
                                 "/login/oauth2/**",
                                 "/swagger-ui/**",
@@ -66,7 +67,6 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/posts/lists", "/posts/{id}").permitAll()
                         .anyRequest().authenticated()
                 )
-                // OAuth2 로그인 구성
                 .oauth2Login(oauth2 -> oauth2
                         .userInfoEndpoint(userInfo -> userInfo
                                 .userService(customOAuth2UserService)
@@ -74,8 +74,10 @@ public class SecurityConfig {
                         .successHandler(oAuth2SuccessHandler)
                         .failureHandler((request, response, e) -> {
                             System.out.println("[DEBUG] : OAuth2 로그인 실패 " + e.getMessage());
-                            ErrorCodeAndMessage error = ErrorCodeAndMessage.UNAUTHORIZED;
-                            response.setStatus(error.getCode());
+
+                            GlobalErrorCode error = GlobalErrorCode.UNAUTHORIZED;
+
+                            response.setStatus(error.getStatus());
                             response.setContentType("text/plain; charset=UTF-8");
                             response.getWriter().write(error.getMessage());
                             response.getWriter().flush();
@@ -86,6 +88,7 @@ public class SecurityConfig {
 
         return http.build();
     }
+
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
