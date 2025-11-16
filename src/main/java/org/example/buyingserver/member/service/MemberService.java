@@ -80,8 +80,10 @@ public class MemberService {
     public Member findOrCreateOAuthMember(OAuth2User oAuth2User) {
         String email = oAuth2User.getAttribute("email");
         String name = oAuth2User.getAttribute("name");
-        String socialId = extractSocialId(oAuth2User);   // ← 분리된 메서드 사용
+        String socialId = extractSocialId(oAuth2User);
         String nickname = (name != null) ? name : email.split("@")[0];
+        SocialType socialType = detectSocialType(oAuth2User);
+
 
         return memberRepository.findByEmail(email)
                 .orElseGet(() -> {
@@ -89,7 +91,7 @@ public class MemberService {
                             email,
                             nickname,
                             socialId,
-                            SocialType.GOOGLE
+                            socialType
                     );
                     return memberRepository.save(newMember);
                 });
@@ -108,5 +110,16 @@ public class MemberService {
             socialId = oAuth2User.getAttribute("id");
         }
         return socialId;
+    }
+
+    private SocialType detectSocialType(OAuth2User oAuth2User) {
+        if (oAuth2User.getAttribute("sub") != null) {
+            return SocialType.GOOGLE;
+        }
+        if (oAuth2User.getAttribute("id") != null) {
+            return SocialType.KAKAO;
+        }
+        return SocialType.UNKNOWN;
+
     }
 }
