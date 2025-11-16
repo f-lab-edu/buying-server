@@ -1,5 +1,10 @@
 package org.example.buyingserver.member.domain;
 
 public enum SocialType {
-    GOOGLE,KAKAO
+    GOOGLE,KAKAO;
+
+    public static SocialType from(String type) {
+        return SocialType.valueOf(type.toUpperCase());
+    }
 }
+
