@@ -13,6 +13,14 @@ spring:
     locations: classpath:db/migration
     baseline-on-migrate: true
 
+  data:
+    mongodb:
+      uri: mongodb://${MONGO_USERNAME}:${MONGO_PASSWORD}@${MONGO_HOST}:${MONGO_PORT}/${MONGO_DB}?authSource=admin
+
+    redis:
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT}
+
   security:
     oauth2:
       client:
