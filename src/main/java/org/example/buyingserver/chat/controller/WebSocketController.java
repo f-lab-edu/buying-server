@@ -1,19 +1,27 @@
 package org.example.buyingserver.chat.controller;
 
-import org.springframework.messaging.handler.annotation.DestinationVariable;
-import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.messaging.handler.annotation.Payload;
-import org.springframework.messaging.handler.annotation.SendTo;
+import lombok.RequiredArgsConstructor;
+import org.example.buyingserver.chat.domain.ChatMessage;
+import org.example.buyingserver.chat.dto.ChatMessageRequest;
+import org.example.buyingserver.chat.service.ChatMessageService;
+import org.springframework.messaging.handler.annotation.*;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 
 @Controller
+@RequiredArgsConstructor
 public class WebSocketController {
 
-    @MessageMapping("/{roomId}")
-    @SendTo("/topic/{roomId}")
-    public String sendMessage(@DestinationVariable Long roomId, @Payload String message) {
+    private final ChatMessageService chatMessageService;
+    private final SimpMessagingTemplate messagingTemplate;
 
-        System.out.println("메세제내용 확인" + message);
-        return message;
+    @MessageMapping("/send/{roomId}")
+    public void sendMessage(
+            @DestinationVariable Long roomId,
+            @Payload ChatMessageRequest request
+    ) {
+        ChatMessage saved = chatMessageService.save(roomId, request);
+        // 브로드캐스트 처리
+        messagingTemplate.convertAndSend("/topic/" + roomId, saved);
     }
 }
