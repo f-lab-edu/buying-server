@@ -1,10 +1,13 @@
 package org.example.buyingserver.chat.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.example.buyingserver.chat.domain.ChatMessage;
 import org.example.buyingserver.chat.domain.ChatRoom;
 import org.example.buyingserver.chat.domain.ChatRoomParticipant;
 import org.example.buyingserver.chat.dto.ChatMessageRequest;
+import org.example.buyingserver.chat.dto.ChatMessageResponse;
+import org.example.buyingserver.chat.dto.ChatMessagesResponse;
 import org.example.buyingserver.chat.dto.ChatRoomRequest;
 import org.example.buyingserver.chat.exception.BuyerConflictWithSellerException;
 import org.example.buyingserver.chat.exception.InvalidChatRequestException;
@@ -20,8 +23,10 @@ import org.example.buyingserver.post.repository.PostRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Objects;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ChatRoomService {
@@ -33,14 +38,18 @@ public class ChatRoomService {
     private final ChatMessageRepository chatMessageRepository;
 
     public ChatMessage save(Long roomId, ChatMessageRequest request) {
+            // 입력 검증
+            if (request.content() == null || request.content().trim().isEmpty()) {
+                throw new IllegalArgumentException("메시지 내용은 필수입니다.");
+            }
+            ChatMessage message = ChatMessage.createText(
+                    roomId,
+                    request.writerId(),
+                    request.content());
 
-        ChatMessage message = ChatMessage.createText(
-                roomId,
-                request.senderId(),
-                request.content()
-        );
+            ChatMessage saved = chatMessageRepository.save(message);
 
-        return chatMessageRepository.save(message);
+            return saved;
     }
 
     // buyer = 채팅방을 요청하는 사용자(구매자)
@@ -72,6 +81,16 @@ public class ChatRoomService {
                 .orElseGet(() -> createNewRoom(post, seller, buyer));
     }
 
+    public ChatMessagesResponse getMessages(Long roomId) {
+
+        List<ChatMessage> messages = chatMessageRepository.findByRoomIdOrderByCreatedAtAsc(roomId);
+
+        List<ChatMessageResponse> dtoList = messages.stream()
+                .map(ChatMessageResponse::from)
+                .toList();
+        return ChatMessagesResponse.from(dtoList);
+    }
+
     private Long createNewRoom(Post post, Member seller, Member buyer) {
 
         ChatRoom room = ChatRoom.createPrivateRoom(post, seller, buyer);
@@ -82,6 +101,5 @@ public class ChatRoomService {
 
         return room.getId();
     }
-
 
 }

@@ -1,14 +1,12 @@
 package org.example.buyingserver.chat.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.example.buyingserver.chat.domain.ChatMessage;
-import org.example.buyingserver.chat.dto.ChatMessageRequest;
-import org.example.buyingserver.chat.dto.ChatRoomRequest;
-import org.example.buyingserver.chat.dto.ChatRoomResponse;
-import org.example.buyingserver.chat.service.ChatMessageService;
+import org.example.buyingserver.chat.dto.*;
 import org.example.buyingserver.chat.service.ChatRoomService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/chat")
@@ -24,7 +22,8 @@ public class ChatRoomController {
         return ResponseEntity.ok(new ChatRoomResponse(roomId));
     }
 
-    @GetMapping("/room/")
-
-
+    @GetMapping("/messages/{roomId}")
+    public ResponseEntity<ChatMessagesResponse> getMessages(Long roomId) {
+        return ResponseEntity.ok(chatRoomService.getMessages(roomId));
+    }
 }
