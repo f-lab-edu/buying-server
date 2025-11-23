@@ -61,7 +61,8 @@ public class JwtTokenFilter extends OncePerRequestFilter {
                 path.startsWith("/v3/api-docs") ||
                 path.equals("/favicon.ico") ||
                 path.equals("/error") ||
-                path.startsWith("/posts/lists");
+                path.startsWith("/posts/lists") ||
+                path.startsWith("/chat");  //추후에 보안상의 이후로 "shouldNotFilter" 로 생성해놔야함
     }
 
     private String resolveToken(HttpServletRequest request) {
