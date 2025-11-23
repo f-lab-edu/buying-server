@@ -23,7 +23,8 @@ public class ChatRoomController {
     }
 
     @GetMapping("/messages/{roomId}")
-    public ResponseEntity<ChatMessagesResponse> getMessages(Long roomId) {
+    public ResponseEntity<ChatMessagesResponse> getMessages(@PathVariable Long roomId) {
+
         return ResponseEntity.ok(chatRoomService.getMessages(roomId));
     }
 }

@@ -21,9 +21,9 @@ public class WebSocketController {
     public void sendMessage(
             @DestinationVariable Long roomId,
             @Payload ChatMessageRequest request) {
-            ChatMessage saved = chatRoomService.save(roomId, request);
-            // 브로드캐스트 처리
-            messagingTemplate.convertAndSend("/topic/" + roomId, saved);
+        ChatMessage saved = chatRoomService.save(roomId, request);
+        // 브로드캐스트 처리
+        messagingTemplate.convertAndSend("/topic/" + roomId, saved);
 
     }
 }

@@ -38,18 +38,18 @@ public class ChatRoomService {
     private final ChatMessageRepository chatMessageRepository;
 
     public ChatMessage save(Long roomId, ChatMessageRequest request) {
-            // 입력 검증
-            if (request.content() == null || request.content().trim().isEmpty()) {
-                throw new IllegalArgumentException("메시지 내용은 필수입니다.");
-            }
-            ChatMessage message = ChatMessage.createText(
-                    roomId,
-                    request.writerId(),
-                    request.content());
+        // 입력 검증
+        if (request.content() == null || request.content().trim().isEmpty()) {
+            throw new IllegalArgumentException("메시지 내용은 필수입니다.");
+        }
+        ChatMessage message = ChatMessage.createText(
+                roomId,
+                request.writerId(),
+                request.content());
 
-            ChatMessage saved = chatMessageRepository.save(message);
+        ChatMessage saved = chatMessageRepository.save(message);
 
-            return saved;
+        return saved;
     }
 
     // buyer = 채팅방을 요청하는 사용자(구매자)
