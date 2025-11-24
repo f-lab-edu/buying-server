@@ -1,6 +1,10 @@
 package org.example.buyingserver.chat.dto;
 
+import jakarta.validation.constraints.NotNull;
+
 public record ChatRoomRequest(
+        @NotNull(message = "게시글 ID는 필수 입력 항목입니다.")
         Long postId,
-        Long buyerId   // 채팅 요청한 사용자
+        @NotNull(message = "구매자 ID는 필수 입력 항목입니다.")
+        Long buyerId
 ) {}

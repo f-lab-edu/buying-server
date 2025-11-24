@@ -6,5 +6,6 @@ public record ChatRoomListItemResponse(
         Long opponentId,
         String opponentName,
         String lastMessage,
-        String lastMessageTime
+        String lastMessageTime,
+        int unreadCount
 ) {}

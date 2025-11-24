@@ -58,6 +58,8 @@ public class ChatMessage {
                 .writerId(writerId)
                 .content(content)
                 .messageType(MessageType.TEXT)
+                .createdAt(Instant.now())
+                .readBy(Set.of(writerId))
                 .build();
     }
 

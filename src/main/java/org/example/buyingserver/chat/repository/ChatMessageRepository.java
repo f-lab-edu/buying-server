@@ -10,5 +10,7 @@ public interface ChatMessageRepository extends MongoRepository<ChatMessage, Stri
 
     List<ChatMessage> findByRoomIdOrderByCreatedAtAsc(Long roomId);
     ChatMessage findTopByRoomIdOrderByCreatedAtDesc(Long roomId);
+    //unread개수찾는 쿼리
+    long countByRoomIdAndReadByNotContaining(Long roomId, Long memberId);
 
 }
