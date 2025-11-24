@@ -5,10 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.example.buyingserver.chat.domain.ChatMessage;
 import org.example.buyingserver.chat.domain.ChatRoom;
 import org.example.buyingserver.chat.domain.ChatRoomParticipant;
-import org.example.buyingserver.chat.dto.ChatMessageRequest;
-import org.example.buyingserver.chat.dto.ChatMessageResponse;
-import org.example.buyingserver.chat.dto.ChatMessagesResponse;
-import org.example.buyingserver.chat.dto.ChatRoomRequest;
+import org.example.buyingserver.chat.dto.*;
 import org.example.buyingserver.chat.exception.BuyerConflictWithSellerException;
 import org.example.buyingserver.chat.exception.InvalidChatRequestException;
 import org.example.buyingserver.chat.repository.ChatMessageRepository;
@@ -91,6 +88,49 @@ public class ChatRoomService {
         return ChatMessagesResponse.from(dtoList);
     }
 
+    public ChatRoomListResponse getMyChatRooms(Long memberId) {
+
+        //내가 속한 모든 방 조회
+        List<ChatRoomParticipant> participants =
+                participantRepository.findByMemberId(memberId);
+
+        List<ChatRoomListItemResponse> list = participants.stream()
+                .map(participant -> {
+                    ChatRoom room = participant.getChatRoom();
+
+                    //상대방 찾기
+                    ChatRoomParticipant opponent = participantRepository
+                            .findByChatRoom_Id(room.getId())
+                            .stream()
+                            .filter(p -> !p.getMember().getId().equals(memberId))
+                            .findFirst()
+                            .orElse(null);
+
+                    Long opponentId = opponent != null ? opponent.getMember().getId() : null;
+                    String opponentName = opponent != null ? opponent.getMember().getNickname() : "알수없음";
+
+                    //마지막 메시지 조회
+                    ChatMessage lastMessage = chatMessageRepository
+                            .findTopByRoomIdOrderByCreatedAtDesc(room.getId());
+
+                    String lastContent = lastMessage != null ? lastMessage.getContent() : "";
+                    String lastTime = lastMessage != null ? lastMessage.getCreatedAt().toString() : "";
+
+                    return new ChatRoomListItemResponse(
+                            room.getId(),
+                            room.getPost().getId(),
+                            opponentId,
+                            opponentName,
+                            lastContent,
+                            lastTime
+                    );
+                })
+                .toList();
+
+        return ChatRoomListResponse.from(list);
+    }
+
+
     private Long createNewRoom(Post post, Member seller, Member buyer) {
 
         ChatRoom room = ChatRoom.createPrivateRoom(post, seller, buyer);
@@ -101,5 +141,7 @@ public class ChatRoomService {
 
         return room.getId();
     }
+
+    private int
 
 }

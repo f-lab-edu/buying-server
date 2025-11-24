@@ -9,4 +9,6 @@ import java.util.List;
 public interface ChatMessageRepository extends MongoRepository<ChatMessage, String> {
 
     List<ChatMessage> findByRoomIdOrderByCreatedAtAsc(Long roomId);
+    ChatMessage findTopByRoomIdOrderByCreatedAtDesc(Long roomId);
+
 }
