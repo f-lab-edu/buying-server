@@ -5,6 +5,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.example.buyingserver.chat.event.EnterRoomEvent;
 import org.example.buyingserver.chat.event.WebSocketDisconnectEvent;
 import org.example.buyingserver.common.auth.JwtTokenProvider;
+import org.example.buyingserver.common.exception.BusinessException;
+import org.example.buyingserver.common.exception.GlobalErrorCode;
 import org.example.buyingserver.member.exception.MemberNotFoundException;
 import org.example.buyingserver.member.repository.MemberRepository;
 import org.springframework.context.ApplicationEventPublisher;
@@ -23,6 +25,7 @@ public class ChatStompInterceptor implements ChannelInterceptor {
     private final ApplicationEventPublisher eventPublisher;
     private final MemberRepository memberRepository;
 
+    // websocket을 통해 들어온 요청이 처리되기 전에 실행되는데
     @Override
     public Message<?> preSend(Message<?> message, MessageChannel channel) {
 
@@ -40,7 +43,16 @@ public class ChatStompInterceptor implements ChannelInterceptor {
             Long roomId = extractRoomId(destination);
 
             // 프론트에서 Authorization 헤더
-            String token = accessor.getFirstNativeHeader("Authorization");
+            String rawToken = accessor.getFirstNativeHeader("Authorization");
+            if (rawToken == null) {
+                log.warn("STOMP SUBSCRIBE but Authorization header missing");
+                throw new BusinessException(GlobalErrorCode.MISSING_AUTHORIZATION_HEADER);
+            }
+
+            String token = rawToken.startsWith("Bearer ")
+                    ? rawToken.substring(7).trim()
+                    : rawToken;
+
             String email = jwtTokenProvider.getEmailFromToken(token);
 
             Long memberId = memberRepository.findByEmail(email)
@@ -67,10 +79,10 @@ public class ChatStompInterceptor implements ChannelInterceptor {
 
                 // 연결 종료 이벤트 발행
                 eventPublisher.publishEvent(
-                        new WebSocketDisconnectEvent(roomId, memberId)
-                );
+                        new WebSocketDisconnectEvent(roomId, memberId));
+
             } else {
-                log.warn("DISCONNECT 발생했으나 roomId/memberId 없음 → 세션 만료 가능");
+                log.warn("DISCONNECT 발생했으나 roomId/memberId 없음  세션 만료 가능");
             }
         }
 

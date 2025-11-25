@@ -1,14 +1,23 @@
 package org.example.buyingserver.chat.config;
 
+import lombok.RequiredArgsConstructor;
+import org.example.buyingserver.chat.websocket.ChatStompInterceptor;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.messaging.simp.config.ChannelRegistration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
 import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
+import org.springframework.web.socket.server.support.HttpSessionHandshakeInterceptor;
 
 @Configuration
 @EnableWebSocketMessageBroker
+@RequiredArgsConstructor
+
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
+
+    private final ChatStompInterceptor chatStompInterceptor;
+
 
 
     @Override
@@ -23,5 +32,10 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
         registry.addEndpoint("/chat")
                 .setAllowedOriginPatterns("*")  //별도 cors
                 .withSockJS();
+    }
+
+    @Override
+    public void configureClientInboundChannel(ChannelRegistration registration) {
+        registration.interceptors(chatStompInterceptor);
     }
 }
