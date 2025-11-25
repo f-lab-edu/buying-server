@@ -8,6 +8,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Getter
 @NoArgsConstructor
@@ -20,7 +21,7 @@ public class ChatRoomMetaInfo {
     private String lastMessage;
     private Instant lastMessageTime;
 
-    private Map<Long, ParticipantMeta> participants = new HashMap<>();
+    private Map<Long, ParticipantMeta> participants = new ConcurrentHashMap<>();
 
     public ChatRoomMetaInfo(Long roomId) {
         this.roomId = roomId;
@@ -41,10 +42,15 @@ public class ChatRoomMetaInfo {
         }
     }
 
-    public void enterRoom(Long memberId) {
+    //일대일 채팅방 용
+    public void enterRoom(Long memberId, boolean connected) {
         ParticipantMeta meta = participants.get(memberId);
         if (meta != null) {
+            //모든 미읽은 초기화히기
             meta.readAll();
+            //연결상태 업데이트
+            if (connected) meta.connect();
+            else meta.disconnect();
         }
     }
 

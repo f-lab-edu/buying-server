@@ -3,10 +3,11 @@ package org.example.buyingserver.chat.controller;
 import lombok.RequiredArgsConstructor;
 import org.example.buyingserver.chat.dto.*;
 import org.example.buyingserver.chat.service.ChatRoomService;
+import org.example.buyingserver.chat.sse.ChatSseEmitterService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
-import java.util.List;
 
 @RestController
 @RequestMapping("/chat")
@@ -14,6 +15,7 @@ import java.util.List;
 public class ChatRoomController {
 
     private final ChatRoomService chatRoomService;
+    private final ChatSseEmitterService chatSseEmitterService;
 
 
     @PostMapping("/room")
@@ -23,9 +25,9 @@ public class ChatRoomController {
     }
 
     @GetMapping("/messages/{roomId}")
-    public ResponseEntity<ChatMessagesResponse> getMessages(@PathVariable Long roomId) {
-
-        return ResponseEntity.ok(chatRoomService.getMessages(roomId));
+    public ResponseEntity<ChatMessagesResponse> getMessages(@PathVariable Long roomId, @RequestParam Long memberId ) {
+//        chatRoomService.enterRoom(roomId, memberId);
+        return ResponseEntity.ok(chatRoomService.getMessages(roomId,memberId));
     }
 
     //현재 내가 속해있는 채팅방 목록 가져오기
@@ -36,4 +38,11 @@ public class ChatRoomController {
         return ResponseEntity.ok(chatRoomService.getMyChatRooms(memberId));
     }
 
+
+    //sse 채팅방 리스트 페이지에서 실시간 메세지 업데이트용
+    //새로운 메시지가 오면 즉시 push
+    @GetMapping(value = "/subscribe/{memberId}", produces = "text/event-stream")
+    public SseEmitter subscribe(@PathVariable Long memberId) {
+        return chatSseEmitterService.createEmitter(memberId);
+    }
 }

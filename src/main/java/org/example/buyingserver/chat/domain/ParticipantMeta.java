@@ -21,6 +21,7 @@ public class ParticipantMeta {
         this.unreadCount++;
     }
 
+    //일대일 채팅방용
     public void readAll() {
         this.unreadCount = 0;
     }

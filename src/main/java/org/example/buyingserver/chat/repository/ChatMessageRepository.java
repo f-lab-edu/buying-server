@@ -2,7 +2,10 @@ package org.example.buyingserver.chat.repository;
 
 
 import org.example.buyingserver.chat.domain.ChatMessage;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.data.mongodb.repository.Query;
+import org.springframework.data.mongodb.repository.Update;
 
 import java.util.List;
 
@@ -10,7 +13,10 @@ public interface ChatMessageRepository extends MongoRepository<ChatMessage, Stri
 
     List<ChatMessage> findByRoomIdOrderByCreatedAtAsc(Long roomId);
     ChatMessage findTopByRoomIdOrderByCreatedAtDesc(Long roomId);
-    //unread개수찾는 쿼리
-    long countByRoomIdAndReadByNotContaining(Long roomId, Long memberId);
 
+    //ToDo: 커스텀으로 나눠
+    @Modifying
+    @Query("{ 'roomId': ?0 }")
+    @Update("{ '$addToSet': { 'readBy': ?1 } }")
+    void addReadByMemberId(Long roomId, Long memberId);
 }
