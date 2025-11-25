@@ -60,11 +60,14 @@ public class ChatRoomService {
 
         ChatMessage saved = chatMessageRepository.save(message);
 
+        List<Long> participantIds = findParticipant(roomId);
+
         eventPublisher.publishEvent(
                 new MessageSavedEvent(
                         saved.getRoomId(),
                         saved.getWriterId(),
-                        saved.getContent()
+                        saved.getContent(),
+                        participantIds
                 )
         );
 
@@ -201,4 +204,17 @@ public class ChatRoomService {
 
         return room.getId();
     }
+
+    /**
+     * 채팅방아이디 기반으로 전체 참여자 목록 조회
+     */
+    private List<Long>findParticipant(Long roomId) {
+        List<Long> participantIds = participantRepository
+                .findByChatRoom_Id(roomId)
+                .stream()
+                .map(p -> p.getMember().getId())
+                .toList();
+        return participantIds;
+    }
+
 }

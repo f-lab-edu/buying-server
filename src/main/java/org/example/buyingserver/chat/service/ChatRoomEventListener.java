@@ -3,6 +3,7 @@ package org.example.buyingserver.chat.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.buyingserver.chat.domain.ChatRoomMetaInfo;
+import org.example.buyingserver.chat.domain.ParticipantMeta;
 import org.example.buyingserver.chat.event.EnterRoomEvent;
 import org.example.buyingserver.chat.event.WebSocketDisconnectEvent;
 import org.example.buyingserver.chat.repository.ChatMessageRepository;
@@ -25,6 +26,7 @@ public class ChatRoomEventListener {
     private final ChatMessageRepository chatMessageRepository;
     private final ChatSseEmitterService sseEmitterService;
 
+    // 채팅방 생성 (1:1 기준)
     @Async
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleRoomCreatedEvent(RoomCreatedEvent event) {
@@ -38,6 +40,7 @@ public class ChatRoomEventListener {
     }
 
 
+    // 메시지 저장 이벤트 처리
     @Async
     @EventListener
     public void handleMessageSavedEvent(MessageSavedEvent event) {
@@ -46,20 +49,29 @@ public class ChatRoomEventListener {
         Long writerId = event.writerId();
 
         ChatRoomMetaInfo meta = metaRepository.findById(roomId)
-                .orElseGet(() -> {
-                    ChatRoomMetaInfo newMeta = new ChatRoomMetaInfo(roomId);
-                    metaRepository.save(newMeta);
-                    return newMeta;
-                });
+                .orElseGet(() -> new ChatRoomMetaInfo(roomId));
 
+        if (meta.getParticipants().isEmpty()) {
+            event.participantIds().forEach(meta::addParticipant);
+        }
+
+        // 마지막 메시지 + unread 증가
         meta.updateLastMessage(writerId, event.content());
+
+        // 현재 방에 접속해 있는 유저는 즉시 읽음 처리
+        meta.getParticipants().values().forEach(pm -> {
+            if (!pm.getMemberId().equals(writerId) && pm.isConnected()) {
+                chatMessageRepository.addReadByMemberId(roomId, pm.getMemberId());
+                pm.readAll(); // unread = 0
+            }
+        });
+
         metaRepository.save(meta);
 
-        // SSE 알림 전송 (읽어야 하는 사람에게만)
-        meta.getParticipants().values().forEach(participant -> {
-            Long memberId = participant.getMemberId();
-            if (!memberId.equals(writerId)) {
-                sseEmitterService.sendMessageNotification(memberId, roomId);
+        //SSE 알림 (발신자 제외)
+        meta.getParticipants().values().forEach(pm -> {
+            if (!pm.getMemberId().equals(writerId)) {
+                sseEmitterService.sendMessageNotification(pm.getMemberId(), roomId);
             }
         });
 
@@ -67,7 +79,8 @@ public class ChatRoomEventListener {
                 roomId, writerId, event.content());
     }
 
-    //채팅방 입장 이벤트 처리
+
+    // 방 입장 이벤트 처리
     @Async
     @EventListener
     public void handleEnterRoomEvent(EnterRoomEvent event) {
@@ -76,20 +89,18 @@ public class ChatRoomEventListener {
         Long memberId = event.memberId();
 
         ChatRoomMetaInfo meta = metaRepository.findById(roomId)
-                .orElseGet(() -> {
-                    ChatRoomMetaInfo newMeta = new ChatRoomMetaInfo(roomId);
-                    metaRepository.save(newMeta);
-                    return newMeta;
-                });
+                .orElseGet(() -> new ChatRoomMetaInfo(roomId));
 
-        meta.enterRoom(memberId,true);
+        meta.enterRoom(memberId, true);
         metaRepository.save(meta);
 
+        // 몽고 메시지 readBy에 추가
         chatMessageRepository.addReadByMemberId(roomId, memberId);
 
         log.info("[EnterRoomEvent] memberId={} entered roomId={} → unread reset",
                 memberId, roomId);
     }
+
 
     @Async
     @EventListener
@@ -99,13 +110,12 @@ public class ChatRoomEventListener {
                 .orElse(null);
 
         if (meta == null) return;
+
         meta.enterRoom(event.memberId(), false);
         metaRepository.save(meta);
 
         log.info("[Disconnect] member {} disconnected room {}",
                 event.memberId(), event.roomId());
     }
-
-
 
 }

@@ -1,8 +1,12 @@
 package org.example.buyingserver.chat.event;
 
+import java.util.List;
+
 public record MessageSavedEvent(
         Long roomId,
         Long writerId,
-        String content
+        String content,
+        List<Long> participantIds
+
 ) {
 }
