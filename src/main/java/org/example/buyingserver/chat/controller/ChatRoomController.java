@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.example.buyingserver.chat.dto.*;
 import org.example.buyingserver.chat.service.ChatRoomService;
 import org.example.buyingserver.chat.sse.ChatSseEmitterService;
+import org.example.buyingserver.common.auth.UserDetailsImpl;
 import org.example.buyingserver.member.domain.Member;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -47,7 +48,11 @@ public class ChatRoomController {
     @GetMapping(value = "/subscribe/{memberId}", produces = "text/event-stream")
     public SseEmitter subscribe(@AuthenticationPrincipal UserDetailsImpl userDetails,
                                 @PathVariable Long memberId) {
+        Long loginUserId = userDetails.getMember().getId();
 
+        if (!loginUserId.equals(memberId)) {
+            throw new UnauthorizedException("SSE 구독 권한이 없습니다.");
+        }
 
         return chatSseEmitterService.createEmitter(memberId);
     }

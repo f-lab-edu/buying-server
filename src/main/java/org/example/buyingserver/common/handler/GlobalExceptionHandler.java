@@ -5,6 +5,7 @@ import org.example.buyingserver.common.dto.ErrorCode;
 import org.example.buyingserver.common.dto.ErrorResponse;
 import org.example.buyingserver.common.exception.BusinessException;
 import org.example.buyingserver.common.exception.GlobalErrorCode;
+import org.example.buyingserver.common.exception.UnauthorizedException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -56,6 +57,15 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Void> handleSseTimeout(AsyncRequestTimeoutException e) {
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
+
+    @ExceptionHandler(UnauthorizedException.class)
+    public ResponseEntity<ErrorResponse> handleUnauthorizedException(UnauthorizedException e) {
+        log.error("[UnauthorizedException] {}", e.getMessage());
+        return ResponseEntity
+                .status(HttpStatus.UNAUTHORIZED)
+                .body(ErrorResponse.fail(e.getErrorCode()));
+    }
+
 
 
 
