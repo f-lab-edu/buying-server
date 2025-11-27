@@ -1,10 +1,13 @@
 package org.example.buyingserver.chat.controller;
 
+import com.sun.security.auth.UserPrincipal;
 import lombok.RequiredArgsConstructor;
 import org.example.buyingserver.chat.dto.*;
 import org.example.buyingserver.chat.service.ChatRoomService;
 import org.example.buyingserver.chat.sse.ChatSseEmitterService;
+import org.example.buyingserver.member.domain.Member;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
@@ -42,7 +45,18 @@ public class ChatRoomController {
     //sse 채팅방 리스트 페이지에서 실시간 메세지 업데이트용
     //새로운 메시지가 오면 즉시 push
     @GetMapping(value = "/subscribe/{memberId}", produces = "text/event-stream")
-    public SseEmitter subscribe(@PathVariable Long memberId) {
+    public SseEmitter subscribe(@AuthenticationPrincipal UserDetailsImpl userDetails,
+                                @PathVariable Long memberId) {
+
+
         return chatSseEmitterService.createEmitter(memberId);
+    }
+
+    private Long getUserId(
+            UserDetailsImpl userDetails) {
+        if (userDetails == null) {
+            return null;
+        }
+        return userDetails.getUserId();
     }
 }

@@ -45,16 +45,20 @@ public class ChatSseEmitterService {
     //사용자에게 속한 채팅방에서 새로운 메세지 알림 전송
     public void sendMessageNotification(Long memberId, Long roomId) {
         SseEmitter emitter = emitters.get(memberId);
+        log.warn("SSE emituer 에 들어온 맴버 아이디 {}", memberId);
 
         if (emitter == null) {
-            log.warn("SSE emitter not found for member {}", memberId);
+            log.warn("SSE 알람에서 맴버아이디를 못참음 {}", memberId);
             return;
         }
 
         try {
+            log.info("[SSE-SEND- 보내기] memberId={}, roomId={}", memberId, roomId);
             emitter.send(SseEmitter.event()
                     .name("new-message")
                     .data(new NewMessage(roomId)));
+            log.info("[SSE-SEND-SUCCESS] memberId={}, roomId={}", memberId, roomId);
+
         } catch (Exception e) {
             emitters.remove(memberId);
             log.error("SSE 전송 실패: memberId={} roomId={}", memberId, roomId, e);
