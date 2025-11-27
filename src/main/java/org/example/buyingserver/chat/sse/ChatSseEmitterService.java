@@ -12,7 +12,6 @@ import java.util.concurrent.ConcurrentHashMap;
 @Slf4j
 @Service
 public class ChatSseEmitterService {
-    //쓰기성능을 위해ㅑ ConcurrentHashMap 사용
     private final Map<Long, SseEmitter> emitters = new ConcurrentHashMap<>();
 
     private static final Long TIMEOUT = 30 * 60 * 1000L;
@@ -23,16 +22,13 @@ public class ChatSseEmitterService {
         emitters.put(memberId, emitter);
         log.info("sse 연결 : : memberId={}", memberId);
 
-        // 연결 종료 시 제거
         emitter.onCompletion(() -> emitters.remove(memberId));
 
-        //타임아웃시
         emitter.onTimeout(() -> {
             emitters.remove(memberId);
             log.info("연결 타이아웃 발생 제거");
         });
 
-        //에러발생
         emitter.onError((e) -> {
             emitters.remove(memberId);
             log.error("SSE 연결 에러: memberId={}", memberId, e);
@@ -42,7 +38,6 @@ public class ChatSseEmitterService {
 
     }
 
-    //사용자에게 속한 채팅방에서 새로운 메세지 알림 전송
     public void sendMessageNotification(Long memberId, Long roomId) {
         SseEmitter emitter = emitters.get(memberId);
         log.warn("SSE emituer 에 들어온 맴버 아이디 {}", memberId);

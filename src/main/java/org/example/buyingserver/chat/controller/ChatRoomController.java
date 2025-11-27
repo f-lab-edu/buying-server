@@ -31,11 +31,9 @@ public class ChatRoomController {
 
     @GetMapping("/messages/{roomId}")
     public ResponseEntity<ChatMessagesResponse> getMessages(@PathVariable Long roomId, @RequestParam Long memberId) {
-        // chatRoomService.enterRoom(roomId, memberId);
         return ResponseEntity.ok(chatRoomService.getMessages(roomId, memberId));
     }
 
-    // 현재 내가 속해있는 채팅방 목록 가져오기
     @GetMapping("/rooms/{memberId}")
     public ResponseEntity<ChatRoomListResponse> getMyRooms(
             @PathVariable Long memberId) {
@@ -43,8 +41,6 @@ public class ChatRoomController {
         return ResponseEntity.ok(chatRoomService.getMyChatRooms(memberId));
     }
 
-    // sse 채팅방 리스트 페이지에서 실시간 메세지 업데이트용
-    // 새로운 메시지가 오면 즉시 push
     @GetMapping(value = "/subscribe/{memberId}", produces = "text/event-stream")
     public SseEmitter subscribe(@PathVariable Long memberId,
             @RequestParam(value = "token", required = false) String token) {

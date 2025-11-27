@@ -40,7 +40,6 @@ public class ChatRoomEventListener {
     }
 
 
-    // 메시지 저장 이벤트 처리
     @Async
     @EventListener
     public void handleMessageSavedEvent(MessageSavedEvent event) {
@@ -55,10 +54,8 @@ public class ChatRoomEventListener {
             event.participantIds().forEach(meta::addParticipant);
         }
 
-        // 마지막 메시지 + unread 증가
         meta.updateLastMessage(writerId, event.content());
 
-        // 현재 방에 접속해 있는 유저는 즉시 읽음 처리
         meta.getParticipants().values().forEach(pm -> {
             if (!pm.getMemberId().equals(writerId) && pm.isConnected()) {
                 chatMessageRepository.addReadByMemberId(roomId, pm.getMemberId());
@@ -80,7 +77,6 @@ public class ChatRoomEventListener {
     }
 
 
-    // 방 입장 이벤트 처리
     @Async
     @EventListener
     public void handleEnterRoomEvent(EnterRoomEvent event) {
