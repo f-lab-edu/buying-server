@@ -32,7 +32,6 @@ public class Order {
     @Column(nullable = false)
     private Long productId;
 
-    /** 주문 시점 상품명 */
     @Column(nullable = false)
     private String productName;
 
@@ -42,7 +41,6 @@ public class Order {
     @Column(nullable = false)
     private int quantity;
 
-    /** 결제 총 금액 */
     @Column(nullable = false)
     private long totalAmount;
 
@@ -96,24 +94,4 @@ public class Order {
                 .status(OrderStatus.READY)
                 .build();
     }
-
-
-    public void markPaid() {
-        if (status != OrderStatus.READY)
-            throw new IllegalStateException("READY 상태만 결제 완료 가능");
-        this.status = OrderStatus.PAID;
-    }
-
-    public void markCanceled() {
-        if (status == OrderStatus.CANCELED)
-            throw new IllegalStateException("이미 취소된 주문입니다.");
-        this.status = OrderStatus.CANCELED;
-    }
-
-    public void markFailed() {
-        if (status == OrderStatus.PAID)
-            throw new IllegalStateException("결제완료된 주문은 실패로 변경 불가");
-        this.status = OrderStatus.FAILED;
-    }
 }
-
