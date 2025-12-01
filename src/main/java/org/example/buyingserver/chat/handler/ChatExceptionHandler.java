@@ -2,6 +2,7 @@ package org.example.buyingserver.chat.handler;
 
 import org.example.buyingserver.chat.exception.*;
 import org.example.buyingserver.common.dto.ApiResponse;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -39,6 +40,12 @@ public class ChatExceptionHandler {
 
     @ExceptionHandler(BuyerConflictWithSellerException.class)
     public ResponseEntity<ApiResponse<?>> handle(BuyerConflictWithSellerException e) {
+        return ResponseEntity.status(e.getErrorCode().getStatus())
+                .body(ApiResponse.error(e.getErrorCode()));
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ApiResponse<?>> handle(ChatRoomAlreadyExistsException e) {
         return ResponseEntity.status(e.getErrorCode().getStatus())
                 .body(ApiResponse.error(e.getErrorCode()));
     }

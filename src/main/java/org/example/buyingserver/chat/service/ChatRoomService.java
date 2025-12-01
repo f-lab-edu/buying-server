@@ -13,6 +13,7 @@ import org.example.buyingserver.chat.event.EnterRoomEvent;
 import org.example.buyingserver.chat.event.MessageSavedEvent;
 import org.example.buyingserver.chat.event.RoomCreatedEvent;
 import org.example.buyingserver.chat.exception.BuyerConflictWithSellerException;
+import org.example.buyingserver.chat.exception.ChatRoomAlreadyExistsException;
 import org.example.buyingserver.chat.repository.ChatMessageRepository;
 import org.example.buyingserver.chat.repository.ChatRoomParticipantRepository;
 import org.example.buyingserver.chat.repository.ChatRoomRepository;
@@ -24,6 +25,7 @@ import org.example.buyingserver.post.domain.Post;
 import org.example.buyingserver.post.exception.PostNotFoundException;
 import org.example.buyingserver.post.repository.PostRepository;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -98,13 +100,19 @@ public class ChatRoomService {
                 return chatRoomRepository.findByPostIdAndAttendUserId(postId, buyerId)
                                 .map(ChatRoom::getId)
                                 .orElseGet(() -> {
-                                        Long newRoomId = createNewRoom(post, seller, buyer);
+                                    try {
+                                    Long newRoomId = createNewRoom(post, seller, buyer);
 
                                         // 신규 방일 때만 이벤트 발행
                                         eventPublisher.publishEvent(
                                                         new RoomCreatedEvent(buyerId, sellerId, newRoomId));
 
-                                        return newRoomId;
+                                        return newRoomId; }
+                                    catch (DataIntegrityViolationException e) {
+                                        return chatRoomRepository.findByPostIdAndAttendUserId(postId, buyerId)
+                                                .orElseThrow(() -> new ChatRoomAlreadyExistsException())
+                                                .getId();
+                                    }
                                 });
         }
 
