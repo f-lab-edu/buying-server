@@ -44,7 +44,7 @@ public class ChatExceptionHandler {
                 .body(ApiResponse.error(e.getErrorCode()));
     }
 
-    @ExceptionHandler(DataIntegrityViolationException.class)
+    @ExceptionHandler(ChatRoomAlreadyExistsException.class)
     public ResponseEntity<ApiResponse<?>> handle(ChatRoomAlreadyExistsException e) {
         return ResponseEntity.status(e.getErrorCode().getStatus())
                 .body(ApiResponse.error(e.getErrorCode()));
