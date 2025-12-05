@@ -210,8 +210,8 @@ public class ChatRoomService {
                 ChatRoom room = ChatRoom.createPrivateRoom(post, seller, buyer);
                 chatRoomRepository.save(room);
 
-                participantRepository.save(ChatRoomParticipant.join(room, post, seller));
-                participantRepository.save(ChatRoomParticipant.join(room, post, buyer));
+                participantRepository.save(ChatRoomParticipant.join(room, seller));
+                participantRepository.save(ChatRoomParticipant.join(room, buyer));
 
                 return room.getId();
         }

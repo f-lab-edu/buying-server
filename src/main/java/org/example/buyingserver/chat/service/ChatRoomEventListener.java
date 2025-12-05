@@ -53,15 +53,7 @@ public class ChatRoomEventListener {
                         event.participantIds().forEach(meta::addParticipant);
                 }
                 // 메타데이터 컬랙션에 아이디값만 저장하도록 수정
-
                 meta.updateLastMessage(writerId, event.messageId());
-
-                // meta.getParticipants().values().forEach(pm -> {
-                // if (!pm.getMemberId().equals(writerId) && pm.isConnected()) {
-                // chatMessageRepository.addReadByMemberId(roomId, pm.getMemberId());
-                // pm.readAll(); // unread = 0
-                // }
-                // });
 
                 metaRepository.save(meta);
 
@@ -88,9 +80,6 @@ public class ChatRoomEventListener {
 
                 meta.enterRoom(memberId, true);
                 metaRepository.save(meta);
-
-                // 몽고 메시지 readBy에 추가
-                // chatMessageRepository.addReadByMemberId(roomId, memberId);
 
                 log.info("[EnterRoomEvent] memberId={} entered roomId={} → unread reset",
                                 memberId, roomId);
