@@ -5,12 +5,11 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.index.Indexed;
 
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 @Getter
 @NoArgsConstructor
@@ -20,8 +19,9 @@ public class ChatMessage {
     @Id
     private String id;
 
-    private Long roomId;        // MySQL ChatRoom PK
-    private Long writerId;      // MySQL Member PK
+    @Indexed
+    private Long roomId;
+    private Long writerId;
 
     private String content;
 
@@ -29,6 +29,7 @@ public class ChatMessage {
 
     private List<String> attachments = new ArrayList<>();
 
+    @Indexed
     private Instant createdAt;
 
     @Builder
