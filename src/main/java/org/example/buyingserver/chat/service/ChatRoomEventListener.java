@@ -22,97 +22,95 @@ import org.springframework.transaction.event.TransactionPhase;
 @RequiredArgsConstructor
 public class ChatRoomEventListener {
 
-    private final ChatRoomMetaRepository metaRepository;
-    private final ChatMessageRepository chatMessageRepository;
-    private final ChatSseEmitterService sseEmitterService;
+        private final ChatRoomMetaRepository metaRepository;
+        private final ChatMessageRepository chatMessageRepository;
+        private final ChatSseEmitterService sseEmitterService;
 
-    // 채팅방 생성 (1:1 기준)
-    @Async
-    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
-    public void handleRoomCreatedEvent(RoomCreatedEvent event) {
-        ChatRoomMetaInfo meta = new ChatRoomMetaInfo(event.roomId());
-        meta.addParticipant(event.sellerId());
-        meta.addParticipant(event.buyerId());
-        metaRepository.save(meta);
+        // 채팅방 생성 (1:1 기준)
+        @Async
+        @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+        public void handleRoomCreatedEvent(RoomCreatedEvent event) {
+                ChatRoomMetaInfo meta = new ChatRoomMetaInfo(event.roomId());
+                meta.addParticipant(event.sellerId());
+                meta.addParticipant(event.buyerId());
+                metaRepository.save(meta);
 
-        log.info("[RoomCreatedEvent] roomId={} seller={} buyer={}",
-                event.roomId(), event.sellerId(), event.buyerId());
-    }
-
-
-    @Async
-    @EventListener
-    public void handleMessageSavedEvent(MessageSavedEvent event) {
-
-        Long roomId = event.roomId();
-        Long writerId = event.writerId();
-
-        ChatRoomMetaInfo meta = metaRepository.findById(roomId)
-                .orElseGet(() -> new ChatRoomMetaInfo(roomId));
-
-        if (meta.getParticipants().isEmpty()) {
-            event.participantIds().forEach(meta::addParticipant);
+                log.info("[RoomCreatedEvent] roomId={} seller={} buyer={}",
+                                event.roomId(), event.sellerId(), event.buyerId());
         }
-        //메타데이터 컬랙션에 아이디값만 저장하도록 수정
 
-        meta.updateLastMessage(writerId, event.content());
+        @Async
+        @EventListener
+        public void handleMessageSavedEvent(MessageSavedEvent event) {
 
-        meta.getParticipants().values().forEach(pm -> {
-            if (!pm.getMemberId().equals(writerId) && pm.isConnected()) {
-                chatMessageRepository.addReadByMemberId(roomId, pm.getMemberId());
-                pm.readAll(); // unread = 0
-            }
-        });
+                Long roomId = event.roomId();
+                Long writerId = event.writerId();
 
-        metaRepository.save(meta);
+                ChatRoomMetaInfo meta = metaRepository.findById(roomId)
+                                .orElseGet(() -> new ChatRoomMetaInfo(roomId));
 
-        //SSE 알림 (발신자 제외)
-        meta.getParticipants().values().forEach(pm -> {
-            if (!pm.getMemberId().equals(writerId)) {
-                sseEmitterService.sendMessageNotification(pm.getMemberId(), roomId);
-            }
-        });
+                if (meta.getParticipants().isEmpty()) {
+                        event.participantIds().forEach(meta::addParticipant);
+                }
+                // 메타데이터 컬랙션에 아이디값만 저장하도록 수정
 
-        log.info("[MessageSavedEvent] roomId={} writerId={} message='{}'",
-                roomId, writerId, event.content());
-    }
+                meta.updateLastMessage(writerId, event.messageId());
 
+                // meta.getParticipants().values().forEach(pm -> {
+                // if (!pm.getMemberId().equals(writerId) && pm.isConnected()) {
+                // chatMessageRepository.addReadByMemberId(roomId, pm.getMemberId());
+                // pm.readAll(); // unread = 0
+                // }
+                // });
 
-    @Async
-    @EventListener
-    public void handleEnterRoomEvent(EnterRoomEvent event) {
+                metaRepository.save(meta);
 
-        Long roomId = event.roomId();
-        Long memberId = event.memberId();
+                // SSE 알림 (발신자 제외)
+                meta.getParticipants().values().forEach(pm -> {
+                        if (!pm.getMemberId().equals(writerId)) {
+                                sseEmitterService.sendMessageNotification(pm.getMemberId(), roomId);
+                        }
+                });
 
-        ChatRoomMetaInfo meta = metaRepository.findById(roomId)
-                .orElseGet(() -> new ChatRoomMetaInfo(roomId));
+                log.info("[MessageSavedEvent] roomId={} writerId={} message='{}'",
+                                roomId, writerId, event.content());
+        }
 
-        meta.enterRoom(memberId, true);
-        metaRepository.save(meta);
+        @Async
+        @EventListener
+        public void handleEnterRoomEvent(EnterRoomEvent event) {
 
-        // 몽고 메시지 readBy에 추가
-        chatMessageRepository.addReadByMemberId(roomId, memberId);
+                Long roomId = event.roomId();
+                Long memberId = event.memberId();
 
-        log.info("[EnterRoomEvent] memberId={} entered roomId={} → unread reset",
-                memberId, roomId);
-    }
+                ChatRoomMetaInfo meta = metaRepository.findById(roomId)
+                                .orElseGet(() -> new ChatRoomMetaInfo(roomId));
 
+                meta.enterRoom(memberId, true);
+                metaRepository.save(meta);
 
-    @Async
-    @EventListener
-    public void handleWebSocketDisconnectEvent(WebSocketDisconnectEvent event) {
+                // 몽고 메시지 readBy에 추가
+                // chatMessageRepository.addReadByMemberId(roomId, memberId);
 
-        ChatRoomMetaInfo meta = metaRepository.findById(event.roomId())
-                .orElse(null);
+                log.info("[EnterRoomEvent] memberId={} entered roomId={} → unread reset",
+                                memberId, roomId);
+        }
 
-        if (meta == null) return;
+        @Async
+        @EventListener
+        public void handleWebSocketDisconnectEvent(WebSocketDisconnectEvent event) {
 
-        meta.enterRoom(event.memberId(), false);
-        metaRepository.save(meta);
+                ChatRoomMetaInfo meta = metaRepository.findById(event.roomId())
+                                .orElse(null);
 
-        log.info("[Disconnect] member {} disconnected room {}",
-                event.memberId(), event.roomId());
-    }
+                if (meta == null)
+                        return;
+
+                meta.enterRoom(event.memberId(), false);
+                metaRepository.save(meta);
+
+                log.info("[Disconnect] member {} disconnected room {}",
+                                event.memberId(), event.roomId());
+        }
 
 }

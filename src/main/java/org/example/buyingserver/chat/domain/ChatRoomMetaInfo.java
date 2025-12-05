@@ -5,7 +5,6 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import java.time.Instant;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -17,7 +16,7 @@ public class ChatRoomMetaInfo {
     @Id
     private Long roomId;
 
-    private String lastMessage;
+    private String lastMessageId;
 
     private Map<Long, ParticipantMeta> participants = new ConcurrentHashMap<>();
 
@@ -25,8 +24,8 @@ public class ChatRoomMetaInfo {
         this.roomId = roomId;
     }
 
-    public void updateLastMessage(Long writerId, String message) {
-        this.lastMessage = message;
+    public void updateLastMessage(Long writerId, String lastMessageId) {
+        this.lastMessageId = lastMessageId;
 
         // 상대방 unreadCount +1 증가
         for (Map.Entry<Long, ParticipantMeta> entry : participants.entrySet()) {

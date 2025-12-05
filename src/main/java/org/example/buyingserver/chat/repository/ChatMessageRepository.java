@@ -14,9 +14,9 @@ public interface ChatMessageRepository extends MongoRepository<ChatMessage, Stri
     List<ChatMessage> findByRoomIdOrderByCreatedAtAsc(Long roomId);
     ChatMessage findTopByRoomIdOrderByCreatedAtDesc(Long roomId);
 
-    //ToDo: 커스텀으로 나눠
-    @Modifying
-    @Query("{ 'roomId': ?0 }")
-    @Update("{ '$addToSet': { 'readBy': ?1 } }")
-    void addReadByMemberId(Long roomId, Long memberId);
+//    //ToDo: 커스텀으로 나눠
+//    @Modifying
+//    @Query("{ 'roomId': ?0 }")
+//    @Update("{ '$addToSet': { 'readBy': ?1 } }")
+//    void addReadByMemberId(Long roomId, Long memberId);
 }

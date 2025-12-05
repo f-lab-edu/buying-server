@@ -4,7 +4,6 @@ import org.example.buyingserver.chat.domain.ChatMessage;
 
 import java.time.Instant;
 import java.util.List;
-import java.util.Set;
 
 public record ChatMessageResponse(
         String id,
@@ -13,7 +12,6 @@ public record ChatMessageResponse(
         String content,
         String messageType,
         List<String> attachments,
-        Set<Long> readBy,
         Instant createdAt
 ) {
     public static ChatMessageResponse from(ChatMessage message) {
@@ -24,7 +22,6 @@ public record ChatMessageResponse(
                 message.getContent(),
                 message.getMessageType().name(),
                 message.getAttachments(),
-                message.getReadBy(),
                 message.getCreatedAt()
         );
     }

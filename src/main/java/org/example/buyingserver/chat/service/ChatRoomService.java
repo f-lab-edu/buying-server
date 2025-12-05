@@ -68,6 +68,7 @@ public class ChatRoomService {
                                 new MessageSavedEvent(
                                                 saved.getRoomId(),
                                                 saved.getWriterId(),
+                                                saved.getId(),
                                                 saved.getContent(),
                                                 participantIds));
 
@@ -159,23 +160,29 @@ public class ChatRoomService {
                                                         : "알수없음";
 
                                         // 마지막 메시지 조회
-                                        ChatMessage lastMessage = chatMessageRepository
-                                                        .findTopByRoomIdOrderByCreatedAtDesc(roomId);
+                                    ChatRoomMetaInfo meta = metaRepository.findById(roomId).orElse(null);
+                                    int unread = 0;
+                                    String lastContent = "";
+                                    String lastTime = "";
 
-                                        String lastContent = lastMessage != null ? lastMessage.getContent() : "";
-                                        String lastTime = lastMessage != null ? lastMessage.getCreatedAt().toString()
-                                                        : "";
+                                    if (meta != null) {
+                                        if(meta.getLastMessageId() != null) {
+                                            ChatMessage lastMessage = chatMessageRepository
+                                                    .findById(meta.getLastMessageId())
+                                                    .orElse(null);
+                                            if (lastMessage != null) {
+                                                lastContent = lastMessage.getContent();
+                                                lastTime = lastMessage.getCreatedAt().toString();
+                                            }
 
-                                        ChatRoomMetaInfo meta = metaRepository.findById(roomId).orElse(null);
-                                        int unread = 0;
-
-                                        if (meta != null) {
+                                        }
                                                 ParticipantMeta participantMeta = meta.getParticipants()
                                                                 .values()
                                                                 .stream()
                                                                 .filter(pm -> pm.getMemberId().equals(memberId))
                                                                 .findFirst()
                                                                 .orElse(null);
+
                                                 if (participantMeta != null) {
                                                         unread = participantMeta.getUnreadCount();
                                                 }
