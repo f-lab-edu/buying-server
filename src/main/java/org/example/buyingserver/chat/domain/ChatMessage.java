@@ -29,8 +29,6 @@ public class ChatMessage {
 
     private List<String> attachments = new ArrayList<>();
 
-    private Set<Long> readBy = new HashSet<>();
-
     private Instant createdAt;
 
     @Builder
@@ -39,7 +37,6 @@ public class ChatMessage {
                         String content,
                         MessageType messageType,
                         List<String> attachments,
-                        Set<Long> readBy,
                         Instant createdAt) {
 
         this.roomId = roomId;
@@ -47,7 +44,6 @@ public class ChatMessage {
         this.content = content;
         this.messageType = messageType != null ? messageType : MessageType.TEXT;
         this.attachments = attachments != null ? attachments : new ArrayList<>();
-        this.readBy = readBy != null ? readBy : new HashSet<>();
         this.createdAt = createdAt != null ? createdAt : Instant.now();
     }
 
@@ -59,7 +55,6 @@ public class ChatMessage {
                 .content(content)
                 .messageType(MessageType.TEXT)
                 .createdAt(Instant.now())
-                .readBy(Set.of(writerId))
                 .build();
     }
 
@@ -81,10 +76,5 @@ public class ChatMessage {
                 .content(content)
                 .messageType(MessageType.SYSTEM)
                 .build();
-    }
-
-    // 읽음 처리
-    public void markAsRead(Long memberId) {
-        this.readBy.add(memberId);
     }
 }
