@@ -180,7 +180,6 @@ public class ChatRoomService {
                                                         unread = participantMeta.getUnreadCount();
                                                 }
                                         }
-
                                         return new ChatRoomListItemResponse(
                                                         roomId,
                                                         room.getPost().getId(),

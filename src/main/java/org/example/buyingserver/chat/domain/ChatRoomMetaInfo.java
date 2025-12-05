@@ -18,7 +18,6 @@ public class ChatRoomMetaInfo {
     private Long roomId;
 
     private String lastMessage;
-    private Instant lastMessageTime;
 
     private Map<Long, ParticipantMeta> participants = new ConcurrentHashMap<>();
 
@@ -28,7 +27,6 @@ public class ChatRoomMetaInfo {
 
     public void updateLastMessage(Long writerId, String message) {
         this.lastMessage = message;
-        this.lastMessageTime = Instant.now();
 
         // 상대방 unreadCount +1 증가
         for (Map.Entry<Long, ParticipantMeta> entry : participants.entrySet()) {
