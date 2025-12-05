@@ -5,6 +5,7 @@ import java.util.List;
 public record MessageSavedEvent(
         Long roomId,
         Long writerId,
+        Long messageId,
         String content,
         List<Long> participantIds
 

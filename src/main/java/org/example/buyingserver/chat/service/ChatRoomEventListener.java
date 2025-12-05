@@ -53,6 +53,7 @@ public class ChatRoomEventListener {
         if (meta.getParticipants().isEmpty()) {
             event.participantIds().forEach(meta::addParticipant);
         }
+        //메타데이터 컬랙션에 아이디값만 저장하도록 수정
 
         meta.updateLastMessage(writerId, event.content());
 
