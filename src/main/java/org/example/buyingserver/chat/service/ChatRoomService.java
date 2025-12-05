@@ -29,8 +29,9 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -101,19 +102,19 @@ public class ChatRoomService {
                 return chatRoomRepository.findByPostIdAndAttendUserId(postId, buyerId)
                                 .map(ChatRoom::getId)
                                 .orElseGet(() -> {
-                                    try {
-                                    Long newRoomId = createNewRoom(post, seller, buyer);
+                                        try {
+                                                Long newRoomId = createNewRoom(post, seller, buyer);
 
-                                        // 신규 방일 때만 이벤트 발행
-                                        eventPublisher.publishEvent(
-                                                        new RoomCreatedEvent(buyerId, sellerId, newRoomId));
+                                                // 신규 방일 때만 이벤트 발행
+                                                eventPublisher.publishEvent(
+                                                                new RoomCreatedEvent(buyerId, sellerId, newRoomId));
 
-                                        return newRoomId; }
-                                    catch (DataIntegrityViolationException e) {
-                                        return chatRoomRepository.findByPostIdAndAttendUserId(postId, buyerId)
-                                                .orElseThrow(() -> new ChatRoomAlreadyExistsException())
-                                                .getId();
-                                    }
+                                                return newRoomId;
+                                        } catch (DataIntegrityViolationException e) {
+                                                return chatRoomRepository.findByPostIdAndAttendUserId(postId, buyerId)
+                                                                .orElseThrow(() -> new ChatRoomAlreadyExistsException())
+                                                                .getId();
+                                        }
                                 });
         }
 
@@ -134,73 +135,145 @@ public class ChatRoomService {
         }
 
         /**
-         * 내가 속한 채팅방 리스트 조회
+         * 내가 속한 채팅방 리스트 조회 (배치 조회 방식)
          */
-        // ToDo : 코드 분리해서 리팩터링해야함
         public ChatRoomListResponse getMyChatRooms(Long memberId) {
-
+                // 참여자 목록 조회
                 List<ChatRoomParticipant> participants = participantRepository.findByMemberId(memberId);
 
+                if (participants.isEmpty()) {
+                        return ChatRoomListResponse.from(List.of());
+                }
+
+                // 배치 조회를 위한 roomId 리스트 수집
+                List<Long> roomIds = participants.stream()
+                                .map(p -> p.getChatRoom().getId())
+                                .toList();
+
+                // 배치 조회: 모든 메타 정보 한 번에 조회
+                Map<Long, ChatRoomMetaInfo> metaMap = metaRepository.findAllById(roomIds)
+                                .stream()
+                                .collect(Collectors.toMap(
+                                                ChatRoomMetaInfo::getRoomId,
+                                                Function.identity()));
+
+                // 배치 조회: 모든 참여자 한 번에 조회 (상대방 찾기용)
+                Map<Long, List<ChatRoomParticipant>> participantsByRoom = participantRepository
+                                .findByChatRoom_IdIn(roomIds)
+                                .stream()
+                                .collect(Collectors.groupingBy(p -> p.getChatRoom().getId()));
+
+                // 배치 조회: 마지막 메시지 ID 수집 및 조회
+                Set<String> lastMessageIds = metaMap.values().stream()
+                                .map(ChatRoomMetaInfo::getLastMessageId)
+                                .filter(Objects::nonNull)
+                                .collect(Collectors.toSet());
+
+                Map<String, ChatMessage> lastMessageMap = lastMessageIds.isEmpty()
+                                ? Map.of()
+                                : chatMessageRepository.findAllById(lastMessageIds)
+                                                .stream()
+                                                .collect(Collectors.toMap(
+                                                                ChatMessage::getId,
+                                                                Function.identity()));
+
+                // DTO 변환
                 List<ChatRoomListItemResponse> list = participants.stream()
-                                .map(participant -> {
-
-                                        ChatRoom room = participant.getChatRoom();
-                                        Long roomId = room.getId();
-
-                                        // 상대방 찾기
-                                        ChatRoomParticipant opponent = participantRepository
-                                                        .findByChatRoom_Id(roomId)
-                                                        .stream()
-                                                        .filter(p -> !p.getMember().getId().equals(memberId))
-                                                        .findFirst()
-                                                        .orElse(null);
-
-                                        Long opponentId = opponent != null ? opponent.getMember().getId() : null;
-                                        String opponentName = opponent != null ? opponent.getMember().getNickname()
-                                                        : "알수없음";
-
-                                        // 마지막 메시지 조회
-                                    ChatRoomMetaInfo meta = metaRepository.findById(roomId).orElse(null);
-                                    int unread = 0;
-                                    String lastContent = "";
-                                    String lastTime = "";
-
-                                    if (meta != null) {
-                                        if(meta.getLastMessageId() != null) {
-                                            ChatMessage lastMessage = chatMessageRepository
-                                                    .findById(meta.getLastMessageId())
-                                                    .orElse(null);
-                                            if (lastMessage != null) {
-                                                lastContent = lastMessage.getContent();
-                                                lastTime = lastMessage.getCreatedAt().toString();
-                                            }
-
-                                        }
-                                                ParticipantMeta participantMeta = meta.getParticipants()
-                                                                .values()
-                                                                .stream()
-                                                                .filter(pm -> pm.getMemberId().equals(memberId))
-                                                                .findFirst()
-                                                                .orElse(null);
-
-                                                if (participantMeta != null) {
-                                                        unread = participantMeta.getUnreadCount();
-                                                }
-                                        }
-                                        return new ChatRoomListItemResponse(
-                                                        roomId,
-                                                        room.getPost().getId(),
-                                                        opponentId,
-                                                        opponentName,
-                                                        lastContent,
-                                                        lastTime,
-                                                        unread);
-                                })
+                                .map(participant -> toChatRoomListItem(
+                                                participant,
+                                                memberId,
+                                                metaMap,
+                                                participantsByRoom,
+                                                lastMessageMap))
                                 .toList();
 
                 return ChatRoomListResponse.from(list);
         }
 
+        private ChatRoomListItemResponse toChatRoomListItem(
+                        ChatRoomParticipant participant,
+                        Long memberId,
+                        Map<Long, ChatRoomMetaInfo> metaMap,
+                        Map<Long, List<ChatRoomParticipant>> participantsByRoom,
+                        Map<String, ChatMessage> lastMessageMap) {
+
+                ChatRoom room = participant.getChatRoom();
+                Long roomId = room.getId();
+
+                // 상대방 찾기
+                OpponentInfo opponent = findOpponent(roomId, memberId, participantsByRoom);
+
+                // 메타 정보 및 마지막 메시지
+                MessageInfo messageInfo = extractMessageInfo(roomId, memberId, metaMap, lastMessageMap);
+
+                return new ChatRoomListItemResponse(
+                                roomId,
+                                room.getPost().getId(),
+                                opponent.id(),
+                                opponent.name(),
+                                messageInfo.content(),
+                                messageInfo.time(),
+                                messageInfo.unreadCount());
+        }
+
+        /**
+         * 상대방 정보 찾기
+         */
+        private OpponentInfo findOpponent(
+                        Long roomId,
+                        Long memberId,
+                        Map<Long, List<ChatRoomParticipant>> participantsByRoom) {
+
+                List<ChatRoomParticipant> roomParticipants = participantsByRoom
+                                .getOrDefault(roomId, List.of());
+
+                ChatRoomParticipant opponent = roomParticipants.stream()
+                                .filter(p -> !p.getMember().getId().equals(memberId))
+                                .findFirst()
+                                .orElse(null);
+
+                if (opponent == null) {
+                        return new OpponentInfo(null, "알수없음");
+                }
+
+                return new OpponentInfo(
+                                opponent.getMember().getId(),
+                                opponent.getMember().getNickname());
+        }
+
+        /**
+         * 메시지 정보 추출
+         */
+        private MessageInfo extractMessageInfo(
+                        Long roomId,
+                        Long memberId,
+                        Map<Long, ChatRoomMetaInfo> metaMap,
+                        Map<String, ChatMessage> lastMessageMap) {
+
+                ChatRoomMetaInfo meta = metaMap.get(roomId);
+
+                if (meta == null) {
+                        return new MessageInfo("", "", 0);
+                }
+
+                // 마지막 메시지 정보
+                String lastMessageId = meta.getLastMessageId();
+                ChatMessage lastMessage = lastMessageId != null
+                                ? lastMessageMap.get(lastMessageId)
+                                : null;
+
+                String content = lastMessage != null ? lastMessage.getContent() : "";
+                String time = lastMessage != null ? lastMessage.getCreatedAt().toString() : "";
+
+                // 미읽음 개수
+                int unread = meta.getParticipants().values().stream()
+                                .filter(pm -> pm.getMemberId().equals(memberId))
+                                .findFirst()
+                                .map(ParticipantMeta::getUnreadCount)
+                                .orElse(0);
+
+                return new MessageInfo(content, time, unread);
+        }
 
         /**
          * 새로운 채팅방 생성
