@@ -135,7 +135,7 @@ public class ChatRoomService {
         }
 
         /**
-         * 내가 속한 채팅방 리스트 조회 (배치 조회 방식)
+         * 내가 속한 채팅방 리스트 조회
          */
         public ChatRoomListResponse getMyChatRooms(Long memberId) {
                 // 참여자 목록 조회
@@ -145,25 +145,25 @@ public class ChatRoomService {
                         return ChatRoomListResponse.from(List.of());
                 }
 
-                // 배치 조회를 위한 roomId 리스트 수집
+                //  roomId 리스트 수집
                 List<Long> roomIds = participants.stream()
                                 .map(p -> p.getChatRoom().getId())
                                 .toList();
 
-                // 배치 조회: 모든 메타 정보 한 번에 조회
+                //모든 메타 정보 한 번에 조회
                 Map<Long, ChatRoomMetaInfo> metaMap = metaRepository.findAllById(roomIds)
                                 .stream()
                                 .collect(Collectors.toMap(
                                                 ChatRoomMetaInfo::getRoomId,
                                                 Function.identity()));
 
-                // 배치 조회: 모든 참여자 한 번에 조회 (상대방 찾기용)
+                // 모든 참여자 한 번에 조회
                 Map<Long, List<ChatRoomParticipant>> participantsByRoom = participantRepository
                                 .findByChatRoom_IdIn(roomIds)
                                 .stream()
                                 .collect(Collectors.groupingBy(p -> p.getChatRoom().getId()));
 
-                // 배치 조회: 마지막 메시지 ID 수집 및 조회
+                //마지막 메시지 ID 수집 및 조회
                 Set<String> lastMessageIds = metaMap.values().stream()
                                 .map(ChatRoomMetaInfo::getLastMessageId)
                                 .filter(Objects::nonNull)
