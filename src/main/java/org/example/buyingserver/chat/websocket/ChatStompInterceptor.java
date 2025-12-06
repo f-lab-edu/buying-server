@@ -25,7 +25,6 @@ public class ChatStompInterceptor implements ChannelInterceptor {
     private final ApplicationEventPublisher eventPublisher;
     private final MemberRepository memberRepository;
 
-    // websocket을 통해 들어온 요청이 처리되기 전에 실행되는데
     @Override
     public Message<?> preSend(Message<?> message, MessageChannel channel) {
 
@@ -39,7 +38,7 @@ public class ChatStompInterceptor implements ChannelInterceptor {
         // 방 입장 + SESSION 저장
         if (command == StompCommand.SUBSCRIBE) {
 
-            String destination = accessor.getDestination(); // 예) /topic/1
+            String destination = accessor.getDestination();
             Long roomId = extractRoomId(destination);
 
             // 프론트에서 Authorization 헤더
