@@ -5,12 +5,18 @@ import org.example.buyingserver.common.dto.ErrorCode;
 import org.example.buyingserver.common.dto.ErrorResponse;
 import org.example.buyingserver.common.exception.BusinessException;
 import org.example.buyingserver.common.exception.GlobalErrorCode;
+import org.example.buyingserver.common.exception.UnauthorizedException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.context.request.async.AsyncRequestTimeoutException;
+import jakarta.servlet.http.HttpServletRequest;
+import org.example.buyingserver.common.exception.UnauthorizedException;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 
 @Slf4j
 @RestControllerAdvice
@@ -51,4 +57,28 @@ public class GlobalExceptionHandler {
                 .body(ErrorResponse.fail(GlobalErrorCode.INVALID_INPUT));
     }
 
+    @ExceptionHandler(AsyncRequestTimeoutException.class)
+    public ResponseEntity<Void> handleSseTimeout(AsyncRequestTimeoutException e) {
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+
+    @ExceptionHandler(UnauthorizedException.class)
+    public ResponseEntity<?> handleUnauthorizedException(
+            UnauthorizedException e,
+            HttpServletRequest request) {
+        log.error("[UnauthorizedException] {}", e.getMessage());
+
+        // SSE 요청인지 확인
+        String acceptHeader = request.getHeader("Accept");
+        if (acceptHeader != null && acceptHeader.contains("text/event-stream")) {
+            return ResponseEntity
+                    .status(HttpStatus.UNAUTHORIZED)
+                    .contentType(MediaType.TEXT_EVENT_STREAM)
+                    .body("event: error\ndata: " + e.getErrorCode().getMessage() + "\n\n");
+        }
+
+        return ResponseEntity
+                .status(HttpStatus.UNAUTHORIZED)
+                .body(ErrorResponse.fail(e.getErrorCode()));
+    }
 }
