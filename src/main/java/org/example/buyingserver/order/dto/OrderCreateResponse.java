@@ -4,4 +4,5 @@ package org.example.buyingserver.order.dto;
 public record OrderCreateResponse(
         String orderId,
         String orderName,
-        Long amount) {}
+        Long amount
+) {}

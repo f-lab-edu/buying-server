@@ -4,6 +4,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.buyingserver.member.domain.Member;
+import org.example.buyingserver.order.domain.Order;
 import org.example.buyingserver.order.domain.OrderType;
 import org.example.buyingserver.order.dto.OrderCreateRequest;
 import org.example.buyingserver.order.dto.OrderCreateResponse;
@@ -44,21 +45,28 @@ public class OrderService {
 
         //4. 주문 번호 생성하기
         String orderId = orderIdGenerator.generateUnique(OrderType.ORDER);
+
         //5. Order 엔티티 생성하여 주문 데이터를 생성
+        Order order = Order.create(
+                member,
+                orderId,
+                post.getId(),
+                post.getTitle(),
+                post.getTitle(),
+                requestedQuantity,
+                totalAmount
+        );
 
         //6. 디비에 저장하고
-        //7. 응답 dto로 보내는데 토스 필수값 넣어서 전달
+        orderRepository.save(order);
+        log.info("주문 생성 완료: orderId={}, buyerId={}, postId={}, amount={}",
+                orderId, member.getId(), post.getId(), totalAmount);
 
-
-        return new OrderCreateResponseDto(
-                orderId,           // 생성된 주문번호
-                post.getTitle(),    // 주문명
-                totalAmount,        // 총 금액
-                request.quantity()  // 주문 수량
+        //7. 응답 dto로 보내는데 토스 필수값만 넣어서 전달
+        return new OrderCreateResponse(
+                orderId,
+                post.getTitle(),
+                totalAmount
         );
     }
-
-
-
-
 }
