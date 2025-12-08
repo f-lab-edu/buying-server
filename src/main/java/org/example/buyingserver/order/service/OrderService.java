@@ -23,9 +23,7 @@ public class OrderService {
 
     private final OrderRepository orderRepository;
     private final PostRepository postRepository;
-    private final OrderIdGenerator orderIdGenerator;  // 주입받기
-
-
+    private final OrderIdGenerator orderIdGenerator;
 
     @Transactional
     public OrderCreateResponse createOrder(OrderCreateRequest request, Member member) {
