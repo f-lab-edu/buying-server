@@ -2,12 +2,14 @@ package org.example.buyingserver.order.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.example.buyingserver.common.auth.MemberDetails;
+import org.example.buyingserver.common.dto.ApiResponse;
+import org.example.buyingserver.common.dto.ResponseCodeAndMessage;
 import org.example.buyingserver.member.domain.Member;
 import org.example.buyingserver.order.dto.OrderCreateRequest;
 import org.example.buyingserver.order.dto.OrderCreateResponse;
 import org.example.buyingserver.order.service.OrderService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,17 +24,8 @@ public class OrderController {
     public ResponseEntity<OrderCreateResponse> createOrder(
             @RequestBody OrderCreateRequest request,
             @AuthenticationPrincipal MemberDetails memberDetails) {
-        //유저 정보 가져오기
         Member  buyer = memberDetails.getMember();
         OrderCreateResponse response = orderService.createOrder(request, buyer);
-
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(ApiResponse.success(ResponseCodeAndMessage.SUCCESS_CREATED, response));
-
-
+        return ResponseEntity.ok(response);
     }
-
-
-
 }
