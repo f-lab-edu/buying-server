@@ -98,6 +98,7 @@ public class Payment {
                 .orderId(order.getOrderId())
                 .totalAmount(order.getTotalAmount())
                 .status(PaymentStatus.READY)
+                .approvedAt(LocalDateTime.now())
                 .build();
     }
 

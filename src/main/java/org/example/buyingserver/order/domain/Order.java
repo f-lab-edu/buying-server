@@ -94,4 +94,8 @@ public class Order {
                 .status(OrderStatus.READY)
                 .build();
     }
+
+    public static Order markAsPaid() {
+
+    }
 }
