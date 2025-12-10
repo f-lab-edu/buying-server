@@ -1,39 +1,37 @@
 package org.example.buyingserver.payment.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Getter;
 
-//토스페이먼츠 결제 승인 응답 DTO
-@Getter
-public class TossApproveResponse {
+//토스페이먼츠 결제 승인 응답
 
-    @JsonProperty("paymentKey")
-    private String paymentKey;
+public record TossApproveResponse(
+        @JsonProperty("paymentKey")
+        String paymentKey,
 
-    @JsonProperty("orderId")
-    private String orderId;
+        @JsonProperty("orderId")
+        String orderId,
 
-    @JsonProperty("status")
-    private String status;
+        @JsonProperty("status")
+        String status,
 
-    @JsonProperty("totalAmount")
-    private Long totalAmount;
+        @JsonProperty("totalAmount")
+        Long totalAmount,
 
-    @JsonProperty("method")
-    private String method;  // "카드", "계좌이체" 등 저장
+        @JsonProperty("method")
+        String method,  // "카드", "계좌이체" 등
 
-    @JsonProperty("approvedAt")
-    private String approvedAt;  // 승인 시간
+        @JsonProperty("approvedAt")
+        String approvedAt,  // 승인 시간 (ISO 8601 형식)
 
-    @JsonProperty("card")
-    private Card card;  // 카드 결제 시 상세 정보
+        @JsonProperty("card")
+        Card card  // 카드 결제 시 상세 정보 (null일 수 있음 확인필요)
+) {
+     //카드 결제 상세 정보
+    public record Card(
+            @JsonProperty("number")
+            String number,  // 카드 번호
 
-    @Getter
-    public static class Card {
-        @JsonProperty("number")
-        private String number;  // 카드 번호 (마스킹됨)
-
-        @JsonProperty("installmentPlanMonths")
-        private Integer installmentPlanMonths;  // 할부 개월 수
-    }
+            @JsonProperty("installmentPlanMonths")
+            Integer installmentPlanMonths  // 할부 개월 수(이것도 저장해야하느낙?)
+    ) {}
 }
