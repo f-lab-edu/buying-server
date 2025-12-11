@@ -57,6 +57,7 @@ public class PaymentService {
                 });
 
         //금액 검증
+        //ToDo: 예외처리 빼야함
         if (order.getTotalAmount() != request.amount()) {
             log.error("금액 불일치: 주문 금액={}, 요청 금액={}",
                     order.getTotalAmount(), request.amount());
@@ -80,6 +81,7 @@ public class PaymentService {
                 .orElseGet(() -> Payment.createPending(order, PGProvider.TOSS));
 
         //approvedAt 파싱
+        //ToDo: approvedAt 필요한지 찾아야함
         LocalDateTime approvedAt = null;
         if (tossResponse.approvedAt() != null && !tossResponse.approvedAt().isEmpty()) {
             try {
