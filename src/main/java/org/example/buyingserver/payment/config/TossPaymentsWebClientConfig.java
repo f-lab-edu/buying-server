@@ -41,15 +41,12 @@ public class TossPaymentsWebClientConfig {
 
     //Authorization 헤더 생성
     private String createAuthorizationHeader() {
-        //시크릿 키 뒤에 콜론(:) 추가
         String credentials = tossPaymentsConfig.getSecretKey() + ":";
 
-        //인코딩
         byte[] encodedBytes = Base64.getEncoder()
                 .encode(credentials.getBytes(StandardCharsets.UTF_8));
         String encoded = new String(encodedBytes);
 
-        // "Basic " 접두사 추가 (뒤에 공백 있음)
         return "Basic " + encoded;
 
     }

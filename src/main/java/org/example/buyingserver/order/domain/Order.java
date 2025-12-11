@@ -28,7 +28,7 @@ public class Order {
     @JoinColumn(name = "buyer_id", nullable = false)
     private Member buyer;
 
-    //post가 수정될 것을 고려하여 id만 복사하여 가져옴
+    // post가 수정될 것을 고려하여 id만 복사하여 가져옴
     @Column(nullable = false)
     private Long productId;
 
@@ -57,13 +57,13 @@ public class Order {
 
     @Builder
     private Order(String orderId,
-                  Member buyer,
-                  Long productId,
-                  String productName,
-                  String orderName,
-                  int quantity,
-                  long totalAmount,
-                  OrderStatus status) {
+            Member buyer,
+            Long productId,
+            String productName,
+            String orderName,
+            int quantity,
+            long totalAmount,
+            OrderStatus status) {
 
         this.orderId = orderId;
         this.buyer = buyer;
@@ -76,12 +76,12 @@ public class Order {
     }
 
     public static Order create(Member buyer,
-                               String orderId,
-                               Long productId,
-                               String productName,
-                               String orderName,
-                               int quantity,
-                               long totalAmount) {
+            String orderId,
+            Long productId,
+            String productName,
+            String orderName,
+            int quantity,
+            long totalAmount) {
 
         return Order.builder()
                 .orderId(orderId)
@@ -95,7 +95,14 @@ public class Order {
                 .build();
     }
 
-    public static Order markAsPaid() {
-
+    /**
+     * 결제 완료 처리
+     * 주문 상태를 PAID로 변경
+     */
+    public void markAsPaid() {
+        if (this.status != OrderStatus.READY) {
+            throw new IllegalStateException("결제 대기 상태가 아닌 주문은 결제할 수 없습니다.");
+        }
+        this.status = OrderStatus.PAID;
     }
 }
