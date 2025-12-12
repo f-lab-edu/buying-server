@@ -25,14 +25,14 @@ public class TossPaymentsClient {
      * @return TossApproveResponse 결제 승인 응답
      * @throws WebClientResponseException API 호출 실패 시
      */
-    public TossApproveResponse approvePayment(String paymentKey, TossApproveRequest request) {
+    public TossApproveResponse approvePayment(TossApproveRequest request) {
         log.info("토스페이먼츠 결제 승인 요청: paymentKey={}, orderId={}, amount={}",
-                paymentKey, request.orderId(), request.amount());
+                request.paymentKey(), request.orderId(), request.amount());
 
         try {
             TossApproveResponse response = tossPaymentsWebClient
                     .post()
-                    .uri("/payments/{paymentKey}/confirm", paymentKey)
+                    .uri("/v1/payments/confirm")
                     .contentType(MediaType.APPLICATION_JSON)
                     .bodyValue(request)
                     .retrieve()

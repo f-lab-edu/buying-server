@@ -28,4 +28,6 @@ public class OrderController {
         OrderCreateResponse response = orderService.createOrder(request, buyer);
         return ResponseEntity.ok(response);
     }
+
+    //todo:orderId로 결제 조회
 }

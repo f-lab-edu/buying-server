@@ -4,7 +4,7 @@ package org.example.buyingserver.payment.dto;
 public record PaymentApproveRequest(
         String paymentKey,
         String orderId,
-        Long amount
+        Number amount
 
 ) {
 }

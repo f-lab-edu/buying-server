@@ -46,7 +46,7 @@ server:
 toss:
   payments:
     secret-key: ${TOSS_SECRET_KEY}
-    base_url: https://api.tosspayments.com
+    base-url: https://api.tosspayments.com
     success-url: http://localhost:3000/payment/success
     fail-url: http://localhost:3000/payment/fail
     webhook-secret: ${TOSS_WEBHOOK_SECRET}

@@ -58,7 +58,7 @@ public class PaymentService {
 
         //금액 검증
         //ToDo: 예외처리 빼야함
-        if (order.getTotalAmount() != request.amount()) {
+        if (order.getTotalAmount() != request.amount().longValue())  {
             log.error("금액 불일치: 주문 금액={}, 요청 금액={}",
                     order.getTotalAmount(), request.amount());
             throw new IllegalArgumentException("결제 금액이 주문 금액과 일치하지 않습니다.");
@@ -66,13 +66,13 @@ public class PaymentService {
 
         //PaymentApproveRequest를 TossApproveRequest로 변환
         TossApproveRequest tossRequest = new TossApproveRequest(
+                request.paymentKey(),
                 request.orderId(),
                 request.amount()
         );
 
         //토스페이먼츠 API 호출
         TossApproveResponse tossResponse = tossPaymentsClient.approvePayment(
-                request.paymentKey(),
                 tossRequest
         );
 
