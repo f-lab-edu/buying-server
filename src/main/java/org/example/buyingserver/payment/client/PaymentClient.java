@@ -1,8 +1,9 @@
 package org.example.buyingserver.payment.client;
 
 import org.example.buyingserver.payment.dto.PaymentApproveRequest;
+import org.example.buyingserver.payment.dto.PaymentApproveResponse;
 
 public interface PaymentClient {
-    PaymentApproveRequest approve(PaymentApproveRequest approveRequest);
+    PaymentApproveResponse approve(PaymentApproveRequest request);
 
 }

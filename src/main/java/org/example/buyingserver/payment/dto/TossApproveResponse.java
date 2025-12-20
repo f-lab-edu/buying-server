@@ -2,6 +2,8 @@ package org.example.buyingserver.payment.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.time.LocalDateTime;
+
 //토스페이먼츠 결제 승인 응답
 
 public record TossApproveResponse(
@@ -21,7 +23,7 @@ public record TossApproveResponse(
         String method,  // "카드", "계좌이체" 등
 
         @JsonProperty("approvedAt")
-        String approvedAt,  // 승인 시간 (ISO 8601 형식)
+        LocalDateTime approvedAt,  // 승인 시간 (ISO 8601 형식)
 
         @JsonProperty("card")
         Card card  // 카드 결제 시 상세 정보 (null일 수 있음 확인필요)
