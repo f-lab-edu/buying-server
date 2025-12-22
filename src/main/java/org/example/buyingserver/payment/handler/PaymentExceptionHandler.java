@@ -43,4 +43,18 @@ public class PaymentExceptionHandler {
                 .status(e.getErrorCode().getStatus())
                 .body(ApiResponse.error(e.getErrorCode()));
     }
+
+    @ExceptionHandler(UnsupportedPaymentProviderException.class)
+    public ResponseEntity<ApiResponse<?>> handleUnsupportedProvider(UnsupportedPaymentProviderException e) {
+        return ResponseEntity
+                .status(e.getErrorCode().getStatus())
+                .body(ApiResponse.error(e.getErrorCode()));
+    }
+
+    @ExceptionHandler(PaymentAmountMismatchException.class)
+    public ResponseEntity<ApiResponse<?>> handleAmountMismatch(PaymentAmountMismatchException e) {
+        return ResponseEntity
+                .status(e.getErrorCode().getStatus())
+                .body(ApiResponse.error(e.getErrorCode()));
+    }
 }
