@@ -19,13 +19,6 @@ public class PaymentController {
 
     private final PaymentService paymentService;
 
-    /**
-     * 결제 승인 API
-     * 프론트엔드에서 토스페이먼츠 successUrl로 리다이렉트된 후 호출한다
-     *
-     * @param request 결제 승인 요청 (paymentKey, orderId, amount)
-     * @return 200 OK (body 없다)
-     */
     @PostMapping("/approve")
     public ResponseEntity<Void> approvePayment(
             @RequestBody PaymentApproveRequest request) {

@@ -28,8 +28,7 @@ public class TossPaymentsClient implements PaymentClient {
         log.info("결제 승인 요청: paymentKey={}, orderId={}, amount={}",
                 request.paymentKey(), request.orderId(), request.amount());
         try {
-            TossApproveRequest tossRequest =  convertToTossRequest(request);
-            TossApproveResponse response = callTossPaymentsApi(tossRequest);
+            TossApproveResponse response = callTossPaymentsApi(convertToTossRequest(request));
 
             log.info("결제 승인 성공: orderId={}, status={}, amount={}",
                     response.orderId(), response.status(), response.totalAmount());
@@ -41,6 +40,11 @@ public class TossPaymentsClient implements PaymentClient {
                     e.getStatusCode(), e.getResponseBodyAsString());
             throw e;
         }
+    }
+
+    @Override
+    public void cancel(String paymentKey, String cancelReason) {
+        log.info("Toss 결제 취소 요청 시작: paymentKey={}, 사유={}", paymentKey, cancelReason);
     }
 
     private TossApproveRequest convertToTossRequest(PaymentApproveRequest request) {

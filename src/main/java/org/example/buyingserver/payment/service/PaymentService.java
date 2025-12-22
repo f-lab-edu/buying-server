@@ -35,10 +35,8 @@ public class PaymentService {
         //주문 번호로 조회
         Order order = validateOrder(request);
 
-        //중복 결제 방지 체크
+        //결제전 검증
         validateDuplicatePayment(request.orderId());
-
-        //금액 검증
         validateAmount(order.getTotalAmount(), request.amount().longValue());
 
         //라우터에게 해당 결제방식을보고 클라이언트 달라고 요청하고 그에 맞는 클래스로 호출

@@ -8,4 +8,6 @@ public interface PaymentClient {
     PaymentApproveResponse approve(PaymentApproveRequest request);
 
     PGProvider getProvider();
+
+    void cancel(String paymentKey, String cancelReason);
 }
