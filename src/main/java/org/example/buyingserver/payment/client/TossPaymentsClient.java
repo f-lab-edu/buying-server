@@ -2,6 +2,7 @@ package org.example.buyingserver.payment.client;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.example.buyingserver.payment.domain.PGProvider;
 import org.example.buyingserver.payment.dto.PaymentApproveRequest;
 import org.example.buyingserver.payment.dto.PaymentApproveResponse;
 import org.example.buyingserver.payment.dto.TossApproveRequest;
@@ -16,6 +17,11 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 @RequiredArgsConstructor
 public class TossPaymentsClient implements PaymentClient {
     private final WebClient tossPaymentsWebClient;
+
+    @Override
+    public PGProvider getProvider() {
+        return PGProvider.TOSS;
+    }
 
     @Override
     public PaymentApproveResponse approve(PaymentApproveRequest request) {

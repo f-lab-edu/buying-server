@@ -21,7 +21,7 @@ public class PaymentClientRouter {
     public PaymentClient route(PGProvider provider) {
         PaymentClient client = clients.get(provider);
         if (client == null) {
-            throw new UnsupportedPaymentProviderException;
+            throw new UnsupportedPaymentProviderException();
         }
         return client;
     }

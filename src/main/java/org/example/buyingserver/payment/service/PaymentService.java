@@ -5,6 +5,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.example.buyingserver.order.domain.Order;
 import org.example.buyingserver.order.exception.OrderNotFoundException;
 import org.example.buyingserver.order.repository.OrderRepository;
+import org.example.buyingserver.payment.client.PaymentClient;
+import org.example.buyingserver.payment.client.PaymentClientRouter;
 import org.example.buyingserver.payment.client.TossPaymentsClient;
 import org.example.buyingserver.payment.domain.PGProvider;
 import org.example.buyingserver.payment.domain.Payment;
@@ -23,6 +25,7 @@ public class PaymentService {
     private final OrderRepository orderRepository;
     private final PaymentRepository paymentRepository;
     private final TossPaymentsClient tossPaymentsClient;
+    private final PaymentClientRouter paymentClientRouter;
 
     @Transactional
     public void approvePayment(PaymentApproveRequest request) {
@@ -32,44 +35,26 @@ public class PaymentService {
         PGProvider provider = request.pgProvider();
 
         //주문 번호로 조회
-        Order order = orderRepository.findByOrderId(request.orderId())
-                .orElseThrow(() -> {
-                    log.error("주문을 찾을 수 없음: orderId={}", request.orderId());
-                    return new OrderNotFoundException();
-                });
+        Order order = validateOrder(request);
 
         //중복 결제 방지 체크
-        paymentRepository.findByOrderId(request.orderId())
-                .ifPresent(payment -> {
-                    if (payment.getStatus() == PaymentStatus.DONE) {
-                        log.error("이미 결제가 완료된 주문: orderId={}, paymentId={}",
-                                request.orderId(), payment.getId());
-                        throw new PaymentAlreadyDoneException();
-                    }
-                });
+        validateDuplicatePayment(request.orderId());
 
         //금액 검증
-        //ToDo: 예외처리 빼야함
-        if (order.getTotalAmount() != request.amount().longValue())  {
-            log.error("금액 불일치: 주문 금액={}, 요청 금액={}",
-                    order.getTotalAmount(), request.amount());
-            throw new IllegalArgumentException("결제 금액이 주문 금액과 일치하지 않습니다.");
-        }
+        validateAmount(order.getTotalAmount(), request.amount().longValue());
 
-        if (provider == PGProvider.TOSS) {
-            //토스페이먼츠 API 호출
-            PaymentApproveResponse tossResponse = tossPaymentsClient.approve(
-                    request
-            );
+        //라우터에게 해당 결제방식을보고 클라이언트 달라고 요청하고 그에 맞는 클래스로 호출
+        PaymentClient paymentClient = paymentClientRouter.route(provider);
+        PaymentApproveResponse approveResponse = paymentClient.approve(request);
 
-            Payment payment = paymentRepository.findByOrderId(request.orderId())
-                    .orElseGet(() -> Payment.createPending(order, provider));
+        Payment payment = paymentRepository.findByOrderId(request.orderId())
+                .orElseGet(() -> Payment.createPending(order, provider));
 
             //결제 승인 완료 처리
             payment.markSuccess(
-                    tossResponse.paymentKey(),
-                    tossResponse.method(),
-                    tossResponse.approvedAt()
+                    approveResponse.paymentKey(),
+                    approveResponse.method(),
+                    approveResponse.approvedAt()
             );
 
             paymentRepository.save(payment);
@@ -81,6 +66,34 @@ public class PaymentService {
 
             log.info("결제 승인 완료: orderId={}, paymentId={}, amount={}",
                     request.orderId(), payment.getId(), request.amount());
+        }
+
+    private Order validateOrder(PaymentApproveRequest request) {
+        Order order = orderRepository.findByOrderId(request.orderId())
+                .orElseThrow(() -> {
+                    log.error("주문을 찾을 수 없음: orderId={}", request.orderId());
+                    return new OrderNotFoundException();
+                });
+
+        return order;
+    }
+
+    private void validateDuplicatePayment(String orderId) {
+        paymentRepository.findByOrderId(orderId)
+                .ifPresent(payment -> {
+                    if (payment.getStatus() == PaymentStatus.DONE) {
+                        log.error("이미 결제가 완료된 주문: orderId={}, paymentId={}",
+                                orderId, payment.getId());
+                        throw new PaymentAlreadyDoneException();
+                    }
+                });
+    }
+
+    private void validateAmount(long amount, long totalAmount) {
+        if (amount != totalAmount)  {
+            log.error("금액 불일치: 주문 금액={}, 요청 금액={}", amount, totalAmount);
+            //ToDo: 예외처리클래스 생성해야함
+            throw new IllegalArgumentException("결제 금액이 주문 금액과 일치하지 않습니다.");
         }
     }
 }
