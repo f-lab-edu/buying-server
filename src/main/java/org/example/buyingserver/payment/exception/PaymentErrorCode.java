@@ -12,7 +12,8 @@ public enum PaymentErrorCode implements ErrorCode {
     PAYMENT_NOT_READY(400, 6002, "READY 상태에서만 결제를 승인할 수 있습니다."),
     PAYMENT_NOT_DONE(400, 6003, "DONE 상태에서만 결제를 취소할 수 있습니다."),
     PAYMENT_ALREADY_DONE(400, 6004, "이미 결제가 완료된 상태입니다."),
-    PAYMENT_FAILED_STATE(400, 6005, "결제를 실패 상태로 변경할 수 없습니다.");
+    PAYMENT_FAILED_STATE(400, 6005, "결제를 실패 상태로 변경할 수 없습니다."),
+    UNSUPPORTED_PAYMENT_PROVIDER(400, 6006, "지원하지 않는 결제 방식입니다.");
 
     private final int status;
     private final int code;
