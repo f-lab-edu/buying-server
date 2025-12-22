@@ -104,8 +104,7 @@ public class Payment {
     // 결제 승인 완료
     public void markSuccess(String pgPaymentId,
                             String method,
-                            LocalDateTime approvedAt,
-                            String rawDataJson) {
+                            LocalDateTime approvedAt) {
 
         if (this.status != PaymentStatus.READY) {
             throw new PaymentNotReadyException();
@@ -114,7 +113,6 @@ public class Payment {
         this.pgPaymentId = pgPaymentId;
         this.method = method;
         this.approvedAt = approvedAt;
-        this.rawDataJson = rawDataJson;
         this.status = PaymentStatus.DONE;
     }
 

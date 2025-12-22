@@ -11,8 +11,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
-import java.time.LocalDateTime;
-
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -21,22 +19,19 @@ public class TossPaymentsClient implements PaymentClient {
 
     @Override
     public PaymentApproveResponse approve(PaymentApproveRequest request) {
-        log.info("토스페이먼츠 결제 승인 요청: paymentKey={}, orderId={}, amount={}",
+        log.info("결제 승인 요청: paymentKey={}, orderId={}, amount={}",
                 request.paymentKey(), request.orderId(), request.amount());
-
-
-        //1. PaymentApproveRequest 요청온거를 Toss dto에 맞춰서 변경하기
         try {
             TossApproveRequest tossRequest =  convertToTossRequest(request);
             TossApproveResponse response = callTossPaymentsApi(tossRequest);
 
-            log.info("토스페이먼츠 결제 승인 성공: orderId={}, status={}, amount={}",
+            log.info("결제 승인 성공: orderId={}, status={}, amount={}",
                     response.orderId(), response.status(), response.totalAmount());
 
             return convertToPaymentResult(response);
 
         } catch (WebClientResponseException e) {
-            log.error("토스페이먼츠 API 호출 실패: status={}, body={}",
+            log.error("API 호출 실패: status={}, body={}",
                     e.getStatusCode(), e.getResponseBodyAsString());
             throw e;
         }
