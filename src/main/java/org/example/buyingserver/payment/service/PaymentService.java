@@ -90,7 +90,6 @@ public class PaymentService {
     private void validateAmount(long amount, long totalAmount) {
         if (amount != totalAmount)  {
             log.error("금액 불일치: 주문 금액={}, 요청 금액={}", amount, totalAmount);
-            //ToDo: 예외처리클래스 생성해야함
             throw new IllegalArgumentException("결제 금액이 주문 금액과 일치하지 않습니다.");
         }
     }
