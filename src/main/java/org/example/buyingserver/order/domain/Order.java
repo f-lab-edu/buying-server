@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.example.buyingserver.member.domain.Member;
+import org.example.buyingserver.order.exception.OrderNotReadyException;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -94,10 +95,9 @@ public class Order {
                 .build();
     }
 
-    //todo: 예외처리만들어야함
     public void markAsPaid() {
         if (this.status != OrderStatus.READY) {
-            throw new IllegalStateException("결제 대기 상태가 아닌 주문은 결제할 수 없습니다.");
+            throw new OrderNotReadyException();
         }
         this.status = OrderStatus.PAID;
     }

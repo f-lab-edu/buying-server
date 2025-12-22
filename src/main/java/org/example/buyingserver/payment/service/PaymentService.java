@@ -7,7 +7,6 @@ import org.example.buyingserver.order.exception.OrderNotFoundException;
 import org.example.buyingserver.order.repository.OrderRepository;
 import org.example.buyingserver.payment.client.PaymentClient;
 import org.example.buyingserver.payment.client.PaymentClientRouter;
-import org.example.buyingserver.payment.client.TossPaymentsClient;
 import org.example.buyingserver.payment.domain.PGProvider;
 import org.example.buyingserver.payment.domain.Payment;
 import org.example.buyingserver.payment.domain.PaymentStatus;
@@ -24,7 +23,6 @@ public class PaymentService {
 
     private final OrderRepository orderRepository;
     private final PaymentRepository paymentRepository;
-    private final TossPaymentsClient tossPaymentsClient;
     private final PaymentClientRouter paymentClientRouter;
 
     @Transactional

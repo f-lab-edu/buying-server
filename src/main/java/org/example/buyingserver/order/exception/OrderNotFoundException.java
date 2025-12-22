@@ -7,6 +7,6 @@ import static org.example.buyingserver.order.exception.OrderErrorCode.ORDER_NOT_
 public class OrderNotFoundException extends BusinessException {
 
     public OrderNotFoundException() {
-        super(OrderErrorCode.ORDER_NOT_READY);
+        super(ORDER_NOT_FOUND);
     }
 }
