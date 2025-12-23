@@ -1,5 +1,4 @@
 package org.example.buyingserver.payment.service;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.buyingserver.order.domain.Order;
@@ -13,6 +12,7 @@ import org.example.buyingserver.payment.domain.PaymentStatus;
 import org.example.buyingserver.payment.dto.PaymentApproveRequest;
 import org.example.buyingserver.payment.dto.PaymentApproveResponse;
 import org.example.buyingserver.payment.exception.PaymentAlreadyDoneException;
+import org.example.buyingserver.payment.exception.PaymentAmountMismatchException;
 import org.example.buyingserver.payment.mapper.PaymentMapper;
 import org.example.buyingserver.payment.repository.PaymentRepository;
 import org.springframework.stereotype.Service;
@@ -62,9 +62,6 @@ public class PaymentService {
 
         }
 
-
-
-
             //결제 승인 완료 처리
             payment.markSuccess(
                     approveResponse.paymentKey(),
@@ -107,7 +104,7 @@ public class PaymentService {
     private void validateAmount(long amount, long totalAmount) {
         if (amount != totalAmount)  {
             log.error("금액 불일치: 주문 금액={}, 요청 금액={}", amount, totalAmount);
-            throw new IllegalArgumentException("결제 금액이 주문 금액과 일치하지 않습니다.");
+            throw new PaymentAmountMismatchException();
         }
     }
 }
