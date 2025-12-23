@@ -58,7 +58,7 @@ public class PaymentService {
         try {
             paymentMapper.updateSuccess(payment,approveResponse, order);
         } catch (Exception e) {
-            paymentClient.cancel(approveResponse.paymentKey(), "시스템장애로인한 TOSS API 결제 취소 요청");
+            paymentClient.cancelPayment(approveResponse.paymentKey(), "시스템장애로인한 TOSS API 결제 취소 요청");
 
         }
 

@@ -9,5 +9,5 @@ public interface PaymentClient {
 
     PGProvider getProvider();
 
-    void cancel(String paymentKey, String cancelReason);
+    void cancelPayment(String paymentKey, String cancelReason);
 }

@@ -45,7 +45,7 @@ public class TossPaymentsClient implements PaymentClient {
     }
 
     @Override
-    public void cancel(String paymentKey, String cancelReason) {
+    public void cancelPayment(String paymentKey, String cancelReason) {
         //결제가 성공했는데 DB에 업데이트 못햇을 경우 Toss에 API cancel 요청
         log.info("Toss 결제 취소 요청 시작: paymentKey={}, 사유={}", paymentKey, cancelReason);
         try {
