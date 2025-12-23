@@ -13,6 +13,7 @@ import org.example.buyingserver.payment.domain.PaymentStatus;
 import org.example.buyingserver.payment.dto.PaymentApproveRequest;
 import org.example.buyingserver.payment.dto.PaymentApproveResponse;
 import org.example.buyingserver.payment.exception.PaymentAlreadyDoneException;
+import org.example.buyingserver.payment.mapper.PaymentMapper;
 import org.example.buyingserver.payment.repository.PaymentRepository;
 import org.springframework.stereotype.Service;
 
@@ -24,8 +25,8 @@ public class PaymentService {
     private final OrderRepository orderRepository;
     private final PaymentRepository paymentRepository;
     private final PaymentClientRouter paymentClientRouter;
+    private final PaymentMapper paymentMapper;
 
-    @Transactional
     public void approvePayment(PaymentApproveRequest request) {
         log.info("결제 승인 요청: paymentKey={}, orderId={}, amount={}, provider={}",
                 request.paymentKey(), request.orderId(), request.amount(), request.pgProvider());
@@ -39,12 +40,30 @@ public class PaymentService {
         validateDuplicatePayment(request.orderId());
         validateAmount(order.getTotalAmount(), request.amount().longValue());
 
+        //결제 진행 전 ready 로 변경
+        Payment payment = paymentMapper.saveReadyPayment(order, request.pgProvider());
+
         //라우터에게 해당 결제방식을보고 클라이언트 달라고 요청하고 그에 맞는 클래스로 호출
         PaymentClient paymentClient = paymentClientRouter.route(provider);
-        PaymentApproveResponse approveResponse = paymentClient.approve(request);
+        PaymentApproveResponse approveResponse;
 
-        Payment payment = paymentRepository.findByOrderId(request.orderId())
-                .orElseGet(() -> Payment.createPending(order, provider));
+        //실패할경우 실패이력저장하도록 변경
+        try {
+            approveResponse = paymentClient.approve(request);
+        } catch (Exception e) {
+            paymentMapper.updateFailure(payment, "API호출 FAILURE", e.getMessage());
+            throw e;
+        }
+
+        try {
+            paymentMapper.updateSuccess(payment,approveResponse, order);
+        } catch (Exception e) {
+            paymentClient.cancel(approveResponse.paymentKey(), "시스템장애로인한 TOSS API 결제 취소 요청");
+
+        }
+
+
+
 
             //결제 승인 완료 처리
             payment.markSuccess(
