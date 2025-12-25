@@ -2,6 +2,7 @@ package org.example.buyingserver.post.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.example.buyingserver.order.exception.InsufficientQuantityException;
 import org.example.buyingserver.post.exception.*;
 import org.example.buyingserver.member.domain.Member;
 import org.hibernate.annotations.CreationTimestamp;
@@ -117,5 +118,17 @@ public class Post {
     public void updateContentAndQuantity(String content, int quantity) {
         this.content = content;
         this.quantity = quantity;
+    }
+
+    public void descreaseQuantity(int requsetQuantity) {
+        if(this.quantity < requsetQuantity) {
+            throw new InsufficientQuantityException();
+        }
+        this.quantity -= requsetQuantity;
+    }
+
+    //주문 취소당할 경우 재고 복구 용
+    public void increaseQuantity(int quantity) {
+        this.quantity += quantity;
     }
 }
