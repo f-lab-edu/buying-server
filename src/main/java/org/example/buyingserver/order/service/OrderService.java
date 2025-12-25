@@ -32,6 +32,7 @@ public class OrderService {
         int requestedQuantity = request.quantity();
         int postAmount = post.getPrice();
         long totalAmount = (long)requestedQuantity * postAmount;
+        int unitprice = post.getPrice();
         post.descreaseQuantity(requestedQuantity);
 
         String orderId = orderIdGenerator.generateUnique(OrderType.ORDER);
@@ -43,6 +44,7 @@ public class OrderService {
                 post.getTitle(),
                 post.getTitle(),
                 requestedQuantity,
+                unitprice,
                 totalAmount
         );
 

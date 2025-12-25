@@ -42,6 +42,9 @@ public class Order {
     private int quantity;
 
     @Column(nullable = false)
+    private int unitPrice;
+
+    @Column(nullable = false)
     private long totalAmount;
 
     @Enumerated(EnumType.STRING)
@@ -62,6 +65,7 @@ public class Order {
             String productName,
             String orderName,
             int quantity,
+            int unitPrice,
             long totalAmount,
             OrderStatus status) {
 
@@ -71,6 +75,7 @@ public class Order {
         this.productName = productName;
         this.orderName = orderName;
         this.quantity = quantity;
+        this.unitPrice = unitPrice;
         this.totalAmount = totalAmount;
         this.status = status;
     }
@@ -81,6 +86,7 @@ public class Order {
             String productName,
             String orderName,
             int quantity,
+            int unitPrice,
             long totalAmount) {
 
         return Order.builder()
@@ -90,6 +96,7 @@ public class Order {
                 .productName(productName)
                 .orderName(orderName)
                 .quantity(quantity)
+                .unitPrice(unitPrice)
                 .totalAmount(totalAmount)
                 .status(OrderStatus.READY)
                 .build();
