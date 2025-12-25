@@ -27,16 +27,12 @@ public class OrderService {
 
     @Transactional
     public OrderCreateResponse createOrder(OrderCreateRequest request, Member member) {
-        Post post = postRepository.findById(request.postId()).orElseThrow(() -> new PostNotFoundException());
+        Post post = postRepository.findByIdWithLock(request.postId()).orElseThrow(() -> new PostNotFoundException());
 
         int requestedQuantity = request.quantity();
-        int postedQuantity = post.getQuantity();
         int postAmount = post.getPrice();
-
-        if(postedQuantity < requestedQuantity) {
-            throw new InsufficientQuantityException();
-        }
         long totalAmount = (long)requestedQuantity * postAmount;
+        post.descreaseQuantity(requestedQuantity);
 
         String orderId = orderIdGenerator.generateUnique(OrderType.ORDER);
 
