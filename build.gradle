@@ -62,6 +62,8 @@ dependencies {
     //MongoDB
     implementation 'org.springframework.boot:spring-boot-starter-data-mongodb'
 
+    //HTTP Client 추가
+    implementation 'org.springframework.boot:spring-boot-starter-webflux'
 
     // Test
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
